@@ -32,7 +32,7 @@ let
     (assertHasField "Kind")
     (assertValueOneOf "Kind" [
       "bridge" "bond" "vlan" "macvlan" "vxlan" "ipip"
-      "gre" "sit" "vti" "veth" "tun" "tap" "dummy"
+      "gre" "sit" "vti" "veth" "tun" "tap" "dummy" "batadv"
     ])
     (assertByteFormat "MTUBytes")
     (assertMacAddress "MACAddress")
@@ -89,6 +89,19 @@ let
       "layer2" "layer3+4" "layer2+3" "encap2+3" "802.3ad" "encap3+4"
     ])
     (assertValueOneOf "LACPTransmitRate" ["slow" "fast"])
+  ];
+
+  checkBatadv = checkUnitConfig "Batadv" [
+    (assertOnlyFields [
+      "GatewayMode" "GatewayBandwidthDown" "GatewayBandwidthUp" "HopPenalty"
+      "OrigInterval" "BridgeLoopAvoidance" "DistributedArpTable"
+      "Fragmentation"
+    ])
+    (assertValueOneOf "GatewayMode" ["off" "client" "server"])
+    (assertValueOneOf "HopPenalty" digits)
+    (assertValueOneOf "BridgeLoopAvoidance" boolValues)
+    (assertValueOneOf "DistributedArpTable" boolValues)
+    (assertValueOneOf "Fragmentation" boolValues)
   ];
 
   checkNetwork = checkUnitConfig "Network" [
@@ -311,6 +324,26 @@ let
       '';
     };
 
+    batadvConfig = mkOption {
+      default = {};
+      example = {
+        GatewayMode = "on";
+        GatewayBandwidthDown = "150M";
+        GatewayBandwidthUp = "100M";
+        HopPenalty = "60";
+        OrigInterval = "500";
+        BridgeLoopAvoidance = true;
+        DistributedArpTable = true;
+        Fragmentation = true;
+      };
+      type = types.addCheck (types.attrsOf unitOption) checkBatadv;
+      description = ''
+        Each attribute in this set specifies an option in the
+        <literal>[Batadv]</literal> section of the unit. See
+        <citerefentry><refentrytitle>systemd.netdev</refentrytitle>
+        <manvolnum>5</manvolnum></citerefentry> for details.
+      '';
+    };
   };
 
   addressOptions = {
@@ -596,6 +629,11 @@ let
             [Bond]
             ${attrsToSection def.bondConfig}
 
+          ''}
+
+          ${optionalString (def.batadvConfig != { }) ''
+            [Batadv]
+            ${attrsToSection def.batadvConfig}
           ''}
           ${def.extraConfig}
         '';
