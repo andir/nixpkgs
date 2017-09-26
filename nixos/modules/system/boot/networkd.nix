@@ -32,7 +32,7 @@ let
     (assertHasField "Kind")
     (assertValueOneOf "Kind" [
       "bridge" "bond" "vlan" "macvlan" "vxlan" "ipip"
-      "gre" "sit" "vti" "veth" "tun" "tap" "dummy"
+      "gre" "sit" "vti" "veth" "tun" "tap" "dummy" "vrf"
     ])
     (assertByteFormat "MTUBytes")
     (assertMacAddress "MACAddress")
@@ -91,10 +91,15 @@ let
     (assertValueOneOf "LACPTransmitRate" ["slow" "fast"])
   ];
 
+  checkVrf = checkUnitConfig "Vrf" [
+    (assertOnlyFields ["TableId"])
+    (assertRouteTable "TableId")
+  ];
+
   checkNetwork = checkUnitConfig "Network" [
     (assertOnlyFields [
       "Description" "DHCP" "DHCPServer" "IPForward" "IPMasquerade" "IPv4LL" "IPv4LLRoute"
-      "LLMNR" "MulticastDNS" "Domains" "Bridge" "Bond"
+      "LLMNR" "MulticastDNS" "Domains" "Bridge" "Bond" "VRF"
     ])
     (assertValueOneOf "DHCP" ["both" "none" "v4" "v6"])
     (assertValueOneOf "DHCPServer" boolValues)
@@ -120,7 +125,7 @@ let
     (assertOnlyFields [
       "UseDNS" "UseMTU" "SendHostname" "UseHostname" "UseDomains" "UseRoutes"
       "CriticalConnections" "VendorClassIdentifier" "RequestBroadcast"
-      "RouteMetric"
+      "RouteMetric" "RouteTable"
     ])
     (assertValueOneOf "UseDNS" boolValues)
     (assertValueOneOf "UseMTU" boolValues)
@@ -130,6 +135,7 @@ let
     (assertValueOneOf "UseRoutes" boolValues)
     (assertValueOneOf "CriticalConnections" boolValues)
     (assertValueOneOf "RequestBroadcast" boolValues)
+    (assertRouteTable "RouteTable")
   ];
 
   checkDhcpServer = checkUnitConfig "DHCPServer" [
@@ -311,6 +317,17 @@ let
       '';
     };
 
+    vrfConfig = mkOption {
+      default = {};
+      example = { TableId = 42; };
+      type = types.addCheck (types.attrsOf unitOption) checkVrf;
+      description = ''
+        Each attribute in this set specifies an option in the
+        <literal>[Vrf]</literal> section of the unit.  See
+        <citerefentry><refentrytitle>systemd.netdev</refentrytitle>
+        <manvolnum>5</manvolnum></citerefentry> for details.
+      '';
+    };
   };
 
   addressOptions = {
@@ -596,6 +613,10 @@ let
             [Bond]
             ${attrsToSection def.bondConfig}
 
+          ''}
+          ${optionalString (def.vrfConfig != { }) ''
+            [VRF]
+            ${attrsToSection def.vrfConfig}
           ''}
           ${def.extraConfig}
         '';

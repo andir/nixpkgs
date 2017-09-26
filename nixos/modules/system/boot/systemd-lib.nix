@@ -60,6 +60,19 @@ rec {
       "Systemd ${group} field `${name}' must be a valid mac address.";
 
 
+  inRange = value: min: max:
+    if !builtins.isString value then
+      (min <= value  && max >= value)
+    else
+      false;
+
+  isString = value:
+    builtins.typeOf value == "string";
+
+  assertRouteTable = name: group: attr:
+    optional (attr ? ${name} && !((inRange attr.${name} 0 4294967296) || (isString attr.${name})))
+      "Systemd ${group} field `${name}' must be a valid route table id (0, 4294967296) or a table name.";
+
   assertValueOneOf = name: values: group: attr:
     optional (attr ? ${name} && !elem attr.${name} values)
       "Systemd ${group} field `${name}' cannot have value `${attr.${name}}'.";
