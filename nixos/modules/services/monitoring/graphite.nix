@@ -8,6 +8,9 @@ let
 
   dataDir = cfg.dataDir;
 
+  pythonPackages = pkgs.python36Packages;
+  pythonPackage = pkgs.python36;
+
   graphiteApiConfig = pkgs.writeText "graphite-api.yaml" ''
     time_zone: ${config.time.timeZone}
     search_index: ${dataDir}/index
@@ -52,10 +55,10 @@ let
 
   carbonEnv = {
     PYTHONPATH = let
-      cenv = pkgs.python.buildEnv.override {
-        extraLibs = [ pkgs.python27Packages.carbon ];
+      cenv = pythonPackage.buildEnv.override {
+        extraLibs = [ pythonPackages.carbon ];
       };
-      cenvPack =  "${cenv}/${pkgs.python.sitePackages}";
+      cenvPack =  "${cenv}/${pythonPackage.sitePackages}";
     # opt/graphite/lib contains twisted.plugins.carbon-cache
     in "${cenvPack}/opt/graphite/lib:${cenvPack}";
     GRAPHITE_ROOT = dataDir;
@@ -114,7 +117,7 @@ in {
       finders = mkOption {
         description = "List of finder plugins to load.";
         default = [];
-        example = literalExample "[ pkgs.python27Packages.graphite_influxdb ]";
+        example = literalExample "[ pythonPackages.graphite_influxdb ]";
         type = types.listOf types.package;
       };
 
@@ -141,8 +144,8 @@ in {
 
       package = mkOption {
         description = "Package to use for graphite api.";
-        default = pkgs.python27Packages.graphite_api;
-        defaultText = "pkgs.python27Packages.graphite_api";
+        default = pythonPackages.graphite_api;
+        defaultText = "pythonPackages.graphite_api";
         type = types.package;
       };
 
@@ -390,7 +393,7 @@ in {
         after = [ "network.target" ];
         environment = carbonEnv;
         serviceConfig = {
-          ExecStart = "${pkgs.pythonPackages.twisted}/bin/twistd ${carbonOpts name}";
+          ExecStart = "${pythonPackages.twisted}/bin/twistd ${carbonOpts name}";
           User = "graphite";
           Group = "graphite";
           PermissionsStartOnly = true;
@@ -414,7 +417,7 @@ in {
         after = [ "network.target" ];
         environment = carbonEnv;
         serviceConfig = {
-          ExecStart = "${pkgs.pythonPackages.twisted}/bin/twistd ${carbonOpts name}";
+          ExecStart = "${pythonPackages.twisted}/bin/twistd ${carbonOpts name}";
           User = "graphite";
           Group = "graphite";
           PIDFile="/run/${name}/${name}.pid";
@@ -430,7 +433,7 @@ in {
         after = [ "network.target" ];
         environment = carbonEnv;
         serviceConfig = {
-          ExecStart = "${pkgs.pythonPackages.twisted}/bin/twistd ${carbonOpts name}";
+          ExecStart = "${pythonPackages.twisted}/bin/twistd ${carbonOpts name}";
           User = "graphite";
           Group = "graphite";
           PIDFile="/run/${name}/${name}.pid";
@@ -441,7 +444,7 @@ in {
 
     (mkIf (cfg.carbon.enableCache || cfg.carbon.enableAggregator || cfg.carbon.enableRelay) {
       environment.systemPackages = [
-        pkgs.pythonPackages.carbon
+        pythonPackages.carbon
       ];
     })
 
@@ -453,16 +456,16 @@ in {
         path = [ pkgs.perl ];
         environment = {
           PYTHONPATH = let
-              penv = pkgs.python.buildEnv.override {
+              penv = pythonPackage.buildEnv.override {
                 extraLibs = [
-                  pkgs.python27Packages.graphite_web
-                  pkgs.python27Packages.pysqlite
+                  pythonPackages.graphite_web
+                  pythonPackages.pysqlite
                 ];
               };
-              penvPack = "${penv}/${pkgs.python.sitePackages}";
+              penvPack = "${penv}/${pythonPackage.sitePackages}";
               # opt/graphite/webapp contains graphite/settings.py
               # explicitly adding pycairo in path because it cannot be imported via buildEnv
-            in "${penvPack}/opt/graphite/webapp:${penvPack}:${pkgs.pythonPackages.pycairo}/${pkgs.python.sitePackages}";
+            in "${penvPack}/opt/graphite/webapp:${penvPack}:${pythonPackages.pycairo}/${pythonPackage.sitePackages}";
           DJANGO_SETTINGS_MODULE = "graphite.settings";
           GRAPHITE_CONF_DIR = configDir;
           GRAPHITE_STORAGE_DIR = dataDir;
@@ -470,7 +473,7 @@ in {
         };
         serviceConfig = {
           ExecStart = ''
-            ${pkgs.python27Packages.waitress}/bin/waitress-serve \
+            ${pythonPackages.waitress}/bin/waitress-serve \
             --host=${cfg.web.listenAddress} --port=${toString cfg.web.port} \
             --call django.core.handlers.wsgi:WSGIHandler'';
           User = "graphite";
@@ -483,10 +486,10 @@ in {
             chmod 0700 ${dataDir}/{whisper/,log/webapp/}
 
             # populate database
-            ${pkgs.python27Packages.graphite_web}/bin/manage-graphite.py syncdb --noinput
+            ${pythonPackages.graphite_web}/bin/manage-graphite.py syncdb --noinput
 
             # create index
-            ${pkgs.python27Packages.graphite_web}/bin/build-index.sh
+            ${pythonPackages.graphite_web}/bin/build-index.sh
 
             chown -R graphite:graphite ${cfg.dataDir}
 
@@ -495,7 +498,7 @@ in {
         '';
       };
 
-      environment.systemPackages = [ pkgs.python27Packages.graphite_web ];
+      environment.systemPackages = [ pythonPackages.graphite_web ];
     })
 
     (mkIf cfg.api.enable {
@@ -505,16 +508,16 @@ in {
         after = [ "network.target" ];
         environment = {
           PYTHONPATH = let
-              aenv = pkgs.python.buildEnv.override {
+              aenv = pythonPackage.buildEnv.override {
                 extraLibs = [ cfg.api.package pkgs.cairo ] ++ cfg.api.finders;
               };
-            in "${aenv}/${pkgs.python.sitePackages}";
+            in "${aenv}/${pythonPackage.sitePackages}";
           GRAPHITE_API_CONFIG = graphiteApiConfig;
           LD_LIBRARY_PATH = "${pkgs.cairo.out}/lib";
         };
         serviceConfig = {
           ExecStart = ''
-            ${pkgs.python27Packages.waitress}/bin/waitress-serve \
+            ${pythonPackages.waitress}/bin/waitress-serve \
             --host=${cfg.api.listenAddress} --port=${toString cfg.api.port} \
             graphite_api.app:app
           '';
@@ -569,7 +572,7 @@ in {
           GRAPHITE_URL = cfg.pager.graphiteUrl;
         };
         serviceConfig = {
-          ExecStart = "${pkgs.pythonPackages.graphite_pager}/bin/graphite-pager --config ${pagerConfig}";
+          ExecStart = "${pythonPackages.graphite_pager}/bin/graphite-pager --config ${pagerConfig}";
           User = "graphite";
           Group = "graphite";
         };
@@ -577,7 +580,7 @@ in {
 
       services.redis.enable = mkDefault true;
 
-      environment.systemPackages = [ pkgs.pythonPackages.graphite_pager ];
+      environment.systemPackages = [ pythonPackages.graphite_pager ];
     })
 
     (mkIf cfg.beacon.enable {
@@ -586,7 +589,7 @@ in {
         wantedBy = [ "multi-user.target" ];
         serviceConfig = {
           ExecStart = ''
-            ${pkgs.pythonPackages.graphite_beacon}/bin/graphite-beacon \
+            ${pythonPackages.graphite_beacon}/bin/graphite-beacon \
               --config=${pkgs.writeText "graphite-beacon.json" (builtins.toJSON cfg.beacon.config)}
           '';
           User = "graphite";
