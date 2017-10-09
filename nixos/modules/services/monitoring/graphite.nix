@@ -378,6 +378,123 @@ in {
         type = types.attrs;
       };
     };
+
+    go-carbon = {
+      enable = mkEnableOption "graphite carbon & api implementation in go";
+      common = {
+	graph-prefix = mkOption {
+          description ="Prefix for all internal go-carbon graphs. Supported macros: {host}";
+          default = "carbon.agents.{host}";
+          example = "carbon.agents.{host}";
+          type = types.str;
+        };
+
+        metric-endpoint = mkOption {
+	  description = ''
+           Endpoint to store internal carbon metrics.
+	   Valid values are: "" or "local", "tcp://host:port", "udp://host:port"
+          '';
+          default = "local";
+          example = "local";
+          type = types.str;
+	};
+
+        max-cpu = mkOption {
+          description =  "Amount of persister workers.";
+          default = 4;
+          example = 4;
+          type = types.int;
+        };
+
+      };
+      whisper = {
+        data-dir = mkOption {
+          description = "Whisper data directory";
+          default = dataDir;
+          defaultText = "services.monitoring.graphite.dataDir";
+          example = "/opt/graphite/storage/whisper";
+          type = types.str;
+        };
+        schemas = mkOption {
+          description = ''
+	    Storage schema defintion as described at
+	    http://graphite.readthedocs.org/en/latest/config-carbon.html#storage-schemas-conf.
+          '';
+          default = "";
+          example = ''
+            [apache_busyWorkers]
+            pattern = ^servers\.www.*\.workers\.busyWorkers$
+            retentions = 15s:7d,1m:21d,15m:5y
+          '';
+        };
+        
+        aggregation = mkOpption {
+          description = ''
+            Optional aggregation defintions as described at
+            http://graphite.readthedocs.org/en/latest/config-carbon.html#storage-aggregation-conf.  
+          '';
+          default = "";
+          example = ''
+            [all_min]
+              pattern = \.min$
+              xFilesFactor = 0.1
+              aggregationMethod = min
+          '';
+          type = types.str
+        };
+    
+        workers = mkOption {
+          description = "Amount of whisper worker threads.";
+          default = 8;
+          example = 8;
+          type = types.int;
+        };
+    
+        max-updates-per-second = mkOption {
+          description = "Maximum amount of whisper update_many() calls per second. 0 - no limit";
+          default = 0;
+          type = types.int;
+        };
+
+        sparse-create = mkOption {
+          description = "Create sparse files.";
+          default = false;
+          type = types.bool;
+	};
+
+        enable = mkEnableOption "go-carbon";
+        
+      };
+      cache = {
+        max-size = mkOption {
+          description = "Maximum amount of data points (not metrics)";
+          default = 1000000;
+          type = types.int;
+        };
+        write-strategy = mkOption {
+          description = "Strategy to persist metrics."
+          default = "max";
+          type = types.enum [ "max" "sorted" "noop" ];
+        };
+      };
+      
+      udp = { 
+        enable = mkEnableOption "udp listener";
+        listen = mkOption {
+          description = "Address to listen on.";
+          default = ":2003"
+          example = "127.0.0.1:2003"
+          type = types.str;
+        };
+        buffer-size = mkOption {
+          description = "Optional internal queue size between receiver and cache.";
+          default = 0;
+          example = 10000;
+          type = types.int;
+        };
+      };
+    };
+   
   };
 
   ###### implementation
