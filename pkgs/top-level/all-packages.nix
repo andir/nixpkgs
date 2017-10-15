@@ -19668,4 +19668,6 @@ with pkgs;
   };
 
   duti = callPackage ../os-specific/darwin/duti {};
+
+  go-carbon = callPackage ../servers/monitoring/go-carbon {};
 }
