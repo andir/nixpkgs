@@ -142,7 +142,7 @@ let
     paths = buildLuaRocks rec {
       name = "paths";
       src = "${distro_src}/pkg/paths";
-      buildInputs = [cmake];
+      nativeBuildInputs = [ cmake ];
       rockspec = "rocks/${name}-scm-1.rockspec";
     };
 
@@ -150,7 +150,7 @@ let
       name = "torch";
       src = "${distro_src}/pkg/torch";
       luadeps = [ paths cwrap ];
-      buildInputs = [ cmake ];
+      nativeBuildInputs = [ cmake ];
       rockspec = "rocks/torch-scm-1.rockspec";
       preBuild = ''
         substituteInPlace ${rockspec} \
@@ -179,7 +179,8 @@ let
     sys = buildLuaRocks rec {
       name = "sys";
       luadeps = [torch];
-      buildInputs = [readline cmake];
+      buildInputs = [readline ];
+      nativeBuildInputs = [ cmake ];
       src = "${distro_src}/pkg/sys";
       rockspec = "sys-1.1-0.rockspec";
       preBuild = ''
@@ -197,7 +198,7 @@ let
     nn = buildLuaRocks rec {
       name = "nn";
       luadeps = [torch luaffifb];
-      buildInputs = [cmake];
+      nativeBuildInputs = [ cmake ];
       src = "${distro_src}/extra/nn";
       rockspec = "rocks/nn-scm-1.rockspec";
       preBuild = ''
@@ -208,7 +209,7 @@ let
     graph = buildLuaRocks rec {
       name = "graph";
       luadeps = [ torch ];
-      buildInputs = [cmake];
+      nativeBuildInputs = [ cmake ];
       src = "${distro_src}/extra/graph";
       rockspec = "rocks/graph-scm-1.rockspec";
       preBuild = ''
@@ -219,7 +220,7 @@ let
     nngraph = buildLuaRocks rec {
       name = "nngraph";
       luadeps = [ torch nn graph ];
-      buildInputs = [cmake];
+      nativeBuildInputs = [ cmake ];
       src = "${distro_src}/extra/nngraph";
       preBuild = ''
         export Torch_DIR=${torch}/share/cmake/torch
@@ -229,7 +230,8 @@ let
     image = buildLuaRocks rec {
       name = "image";
       luadeps = [ torch dok sys xlua ];
-      buildInputs = [cmake libjpeg libpng];
+      nativeBuildInputs = [ cmake ];
+      buildInputs = [libjpeg libpng];
       src = "${distro_src}/pkg/image";
       rockspec = "image-1.1.alpha-0.rockspec";
       preBuild = ''
@@ -240,7 +242,7 @@ let
     optim = buildLuaRocks rec {
       name = "optim";
       luadeps = [ torch ];
-      buildInputs = [cmake];
+      nativeBuildInputs = [cmake];
       src = "${distro_src}/pkg/optim";
       rockspec = "optim-1.0.5-0.rockspec";
       preBuild = ''
@@ -259,7 +261,7 @@ let
     unsup = buildLuaRocks rec {
       name = "unsup";
       luadeps = [ torch xlua optim ];
-      buildInputs = [ cmake ];
+      nativeBuildInputs = [ cmake ];
       src = fetchgit {
         url = "https://github.com/koraykv/unsup";
         rev = "1d4632e716dc3c82feecc7dd4b22549df442859f";
@@ -301,8 +303,8 @@ let
       preConfigure = ''
         cmakeFlags="-DLUA_LIBRARY=${lua}/lib/lua/${lua.luaversion} -DINSTALL_CMOD=$out/lib/lua/${lua.luaversion} -DINSTALL_MOD=$out/lib/lua/${lua.luaversion}"
       '';
-
-      buildInputs = [cmake libuuid lua];
+      nativeBuildInputs = [ cmake ];
+      buildInputs = [libuuid lua];
       meta = {
         # FIXME: set the exact revision for src
         broken = true;
