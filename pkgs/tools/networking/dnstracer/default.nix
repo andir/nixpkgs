@@ -2,7 +2,7 @@
 
 stdenv.mkDerivation rec {
   version = "1.9";
-  name = "dnstracer";
+  name = "dnstracer-${version}";
 
   src = fetchurl {
     url = "http://www.mavetju.org/download/dnstracer-${version}.tar.gz";
