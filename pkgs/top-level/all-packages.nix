@@ -7327,6 +7327,8 @@ with pkgs;
 
   jam = callPackage ../development/tools/build-managers/jam { };
 
+  jameica = callPackage ../applications/office/jameica { };
+
   jamomacore = callPackage ../development/libraries/audio/jamomacore { };
 
   jikespg = callPackage ../development/tools/parsing/jikespg { };
