@@ -91,7 +91,7 @@ How to find a name?
   * grep vim-pi
   * use VAM's completion or :AddonsInfo command
 
-It might happen than a plugin is not known by vim-pi yet. We encourage you to
+It might happen that a plugin is not known by vim-pi yet. We encourage you to
 contribute to vim-pi so that plugins can be updated automatically.
 
 
