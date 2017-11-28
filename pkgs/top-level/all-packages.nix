@@ -3916,6 +3916,8 @@ with pkgs;
 
   pcsc-cyberjack = callPackage ../tools/security/pcsc-cyberjack { };
 
+  pcsc-ctapi-wrapper = callPackage ../tools/security/pcsc-ctapi-wrappper { };
+
   pdf2djvu = callPackage ../tools/typesetting/pdf2djvu { };
 
   pdf2htmlEX = callPackage ../tools/typesetting/pdf2htmlEX { };
