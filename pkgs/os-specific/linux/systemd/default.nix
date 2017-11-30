@@ -48,13 +48,8 @@ in
       #"-Dprefix=$(out)"
       "-Dloadkeys-path=${kbd}/bin/loadkeys"
       "-Dsetfont-path=${kbd}/bin/setfont"
-      "-Ddbuspolicydir=$(out)/etc/dbus-1/system.d"
-      "-Ddbussessionservicedir=$(out)/share/dbus-1/services"
-      "-Ddbussystemservicedir=$(out)/share/dbus-1/system-services"
-      "-Dpamconfdir=$(out)/etc/pam.d"
-      "-Dsysconfdir=$(out)/etc"
       "-Dtty-gid=3" # tty in NixOS has gid 3
-  #    "-Dtests=" # TODO
+      # "-Dtests=" # TODO
       "-Dlz4=true"
       "-Dhostnamed=true"
       "-Dnetworkd=true"
@@ -89,7 +84,13 @@ in
 
     preConfigure =
       ''
-        mesonFlags+=("-Dntp-servers=0.nixos.pool.ntp.org 1.nixos.pool.ntp.org 2.nixos.pool.ntp.org 3.nixos.pool.ntp.org")
+        mesonFlagsArray+=(-Dntp-servers="0.nixos.pool.ntp.org 1.nixos.pool.ntp.org 2.nixos.pool.ntp.org 3.nixos.pool.ntp.org")
+        mesonFlagsArray+=(-Ddbuspolicydir=$out/etc/dbus-1/system.d)
+        mesonFlagsArray+=(-Ddbussessionservicedir=$out/share/dbus-1/services)
+        mesonFlagsArray+=(-Ddbussystemservicedir=$out/share/dbus-1/system-services)
+        mesonFlagsArray+=(-Dpamconfdir=$out/etc/pam.d)
+        mesonFlagsArray+=(-Dsysconfdir=$out/etc)
+
         export LC_ALL="en_US.UTF-8";
         # FIXME: patch this in systemd properly (and send upstream).
         # already fixed in f00929ad622c978f8ad83590a15a765b4beecac9: (u)mount
