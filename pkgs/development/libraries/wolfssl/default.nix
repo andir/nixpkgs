@@ -1,15 +1,22 @@
-{ stdenv, fetchFromGitHub, autoreconfHook }:
+{ stdenv, fetchFromGitHub, fetchpatch, autoreconfHook }:
 
 stdenv.mkDerivation rec {
   name = "wolfssl-${version}";
-  version = "3.12.0";
+  version = "3.12.2";
 
   src = fetchFromGitHub {
     owner = "wolfSSL";
     repo = "wolfssl";
     rev = "v${version}-stable";
-    sha256 = "0bjfzpgj50cd27lfz6vry9bdz0f0kvgq8plqdbhlk7kjp32nm2bv";
+    sha256 = "1a45kd15xb7ni176kr28sxpl7g26v99mb0nikbzrlq3lfv0h95lh";
   };
+
+  patches = [
+    (fetchpatch {
+      url = "https://github.com/wolfSSL/wolfssl/commit/fd455d5a5e9fef24c208e7ac7d3a4bc58834cbf1.diff";
+      sha256 = "0xlbk6fkqpjbwpfn1g4vq5aq7pps7lmb4dkqna69in11fmv73002";
+    })
+  ];
 
   outputs = [ "out" "dev" "doc" "lib" ];
 
