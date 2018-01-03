@@ -16,6 +16,8 @@ buildPythonPackage rec {
     extension = "zip";
   };
 
+  patches = [ ./add-test-afm.patch ];
+
   buildInputs = [
     numpy
   ];
