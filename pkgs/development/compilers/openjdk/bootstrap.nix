@@ -1,16 +1,18 @@
-{ stdenv, runCommand, glibc, fetchurl, file
+{ stdenv, runCommand, glibc, fetchurl, file, callPackage, zlib
 
 , version
 }:
 
 let
   # !!! These should be on nixos.org
-  src = if glibc.system == "x86_64-linux" then
+  src =
+  if glibc.system == "aarch64-linux" then
     (if version == "8" then
-      fetchurl {
-        url = "https://www.dropbox.com/s/a0lsq2ig4uguky5/openjdk8-bootstrap-x86_64-linux.tar.xz?dl=1";
-        sha256 = "18zqx6jhm3lizn9hh6ryyqc9dz3i96pwaz8f6nxfllk70qi5gvks";
-      }
+       callPackage ./make-bootstrap.nix { openjdk = callPackage ./debian-boot-jdk.nix { arch = glibc.system; }; }
+     else throw "No bootstrap for version")
+  else if glibc.system == "x86_64-linux" then
+    (if version == "8" then
+       callPackage ./make-bootstrap.nix { openjdk = callPackage ./debian-boot-jdk.nix { arch = glibc.system; }; }
     else if version == "7" then
       fetchurl {
         url = "https://www.dropbox.com/s/rssfbeommrfbsjf/openjdk7-bootstrap-x86_64-linux.tar.xz?dl=1";
@@ -41,7 +43,7 @@ let
 
     for i in $out/bin/*; do
       patchelf --set-interpreter ${glibc.out}/lib/ld-linux*.so.2 $i || true
-      patchelf --set-rpath "${glibc.out}/lib:$LIBDIRS" $i || true
+      patchelf --set-rpath "${glibc.out}/lib:${zlib.out}/lib:$LIBDIRS" $i || true
     done
 
     find $out -name \*.so\* | while read lib; do
@@ -49,12 +51,13 @@ let
       patchelf --set-rpath "${glibc.out}/lib:${stdenv.cc.cc.lib}/lib:$LIBDIRS" $lib || true
     done
 
+    # FIXME: with the debian tarballs as source paxmark is throwing errors about invalid ELF files
     # Temporarily, while NixOS's OpenJDK bootstrap tarball doesn't have PaX markings:
-    exes=$(${file}/bin/file $out/bin/* 2> /dev/null | grep -E 'ELF.*(executable|shared object)' | sed -e 's/: .*$//')
-    for file in $exes; do
-      paxmark m "$file"
-      # On x86 for heap sizes over 700MB disable SEGMEXEC and PAGEEXEC as well.
-      ${stdenv.lib.optionalString stdenv.isi686 ''paxmark msp "$file"''}
-    done
+    #    exes=$(${file}/bin/file $out/bin/* 2> /dev/null | grep -E 'ELF.*(executable|shared object)' | sed -e 's/: .*$//')
+    #    for file in $exes; do
+    #      paxmark m "$file"
+    #      # On x86 for heap sizes over 700MB disable SEGMEXEC and PAGEEXEC as well.
+    #      ${stdenv.lib.optionalString stdenv.isi686 ''paxmark msp "$file"''}
+    #    done
   '';
 in bootstrap
