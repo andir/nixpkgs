@@ -42,12 +42,12 @@ let
     LIBDIRS="$(find $out -name \*.so\* -exec dirname {} \; | sort | uniq | tr '\n' ':')"
 
     for i in $out/bin/*; do
-      patchelf --set-interpreter ${glibc.out}/lib/ld-linux*.so.2 $i || true
+      patchelf --set-interpreter ${glibc.out}/lib/ld-linux*.so.${if (stdenv.isi686 || stdenv.isx86_64) then "2" else "1"} $i || true
       patchelf --set-rpath "${glibc.out}/lib:${zlib.out}/lib:$LIBDIRS" $i || true
     done
 
     find $out -name \*.so\* | while read lib; do
-      patchelf --set-interpreter ${glibc.out}/lib/ld-linux*.so.2 $lib || true
+      patchelf --set-interpreter ${glibc.out}/lib/ld-linux*.so.${if (stdenv.isi686 || stdenv.isx86_64) then "2" else "1"} $lib || true
       patchelf --set-rpath "${glibc.out}/lib:${stdenv.cc.cc.lib}/lib:$LIBDIRS" $lib || true
     done
 
