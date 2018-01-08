@@ -18,8 +18,10 @@ let
       "i386"
     else if stdenv.system == "x86_64-linux" then
       "amd64"
+    else if stdenv.ssystem == "aarch64-linux" then
+      "aarch64"
     else
-      throw "openjdk requires i686-linux or x86_64 linux";
+      throw "openjdk requires i686-linux, x86_64 linux or aarc64-linux";
 
   update = "152";
   build = "16";
