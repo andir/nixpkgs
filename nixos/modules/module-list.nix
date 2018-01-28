@@ -381,6 +381,7 @@
   ./services/monitoring/osquery.nix
   ./services/monitoring/prometheus/default.nix
   ./services/monitoring/prometheus/alertmanager.nix
+  ./services/monitoring/prometheus/bird-exporter.nix
   ./services/monitoring/prometheus/blackbox-exporter.nix
   ./services/monitoring/prometheus/collectd-exporter.nix
   ./services/monitoring/prometheus/fritzbox-exporter.nix
