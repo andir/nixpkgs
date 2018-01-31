@@ -26,7 +26,9 @@ rec {
     updateScript = callPackage ./update.nix {
       attrPath = "firefox-unwrapped";
     };
-  } {};
+  } {
+    enableOfficialBranding = true;
+  };
 
   firefox-esr = common rec {
     pname = "firefox-esr";
