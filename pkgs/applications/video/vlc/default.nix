@@ -1,63 +1,50 @@
 { stdenv, fetchurl, xz, bzip2, perl, xorg, libdvdnav, libbluray
 , zlib, a52dec, libmad, faad2, ffmpeg, alsaLib
+, libarchive, gettext
 , pkgconfig, dbus, fribidi, freefont_ttf, libebml, libmatroska
-, libvorbis, libtheora, speex, lua5, libgcrypt, libupnp
+, libvorbis, libtheora, speex, lua5_1, libgcrypt, libgpgerror, libupnp, libnotify, libsecret, libmodplug
 , libcaca, libpulseaudio, flac, schroedinger, libxml2, librsvg
 , mpeg2dec, udev, gnutls, avahi, libcddb, libjack2, SDL, SDL_image
 , libmtp, unzip, taglib, libkate, libtiger, libv4l, samba, liboggz
 , libass, libva, libdvbpsi, libdc1394, libraw1394, libopus
-, libvdpau, libsamplerate, live555, fluidsynth
+, libvdpau, libsamplerate, live555, fluidsynth, opencv, libssh2, libnfs, libshout
 , onlyLibVLC ? false
-, qt4 ? null
-, withQt5 ? false, qtbase ? null, qtx11extras ? null
+, qt5
 , jackSupport ? false
 , fetchpatch
 }:
 
 with stdenv.lib;
 
-assert (withQt5 -> qtbase != null && qtx11extras != null);
-assert (!withQt5 -> qt4 != null);
-
 stdenv.mkDerivation rec {
   name = "vlc-${version}";
-  version = "2.2.8";
+  version = "3.0.0";
 
   src = fetchurl {
     url = "http://get.videolan.org/vlc/${version}/${name}.tar.xz";
-    sha256 = "1v32snw46rkgbdqdy3dssl2y13i8p2cr1cw1i18r6vdmiy24dw4v";
+    sha256 = "1761w3x3568p8y9a78g5h9ddn2wipa5rjs9xrbsqvmahkycqgmb8";
   };
 
-  # Comment-out the Qt 5.5 version check, as we do apply the relevant patch.
-  # https://trac.videolan.org/vlc/ticket/16497
-  postPatch = if (!withQt5) then null else
-    "sed '/I78ef29975181ee22429c9bd4b11d96d9e68b7a9c/s/^/: #/' -i configure";
+  BUILDCC="${stdenv.cc}/bin/cc";
 
   buildInputs =
-    [ xz bzip2 perl zlib a52dec libmad faad2 ffmpeg alsaLib libdvdnav libdvdnav.libdvdread
-      libbluray dbus fribidi libvorbis libtheora speex lua5 libgcrypt
-      libupnp libcaca libpulseaudio flac schroedinger libxml2 librsvg mpeg2dec
-      udev gnutls avahi libcddb SDL SDL_image libmtp unzip taglib
-      libkate libtiger libv4l samba liboggz libass libdvbpsi libva
-      xorg.xlibsWrapper xorg.libXv xorg.libXvMC xorg.libXpm xorg.xcbutilkeysyms
-      libdc1394 libraw1394 libopus libebml libmatroska libvdpau libsamplerate live555
-      fluidsynth
-    ]
-    ++ [(if withQt5 then qtbase else qt4)]
-    ++ optional withQt5 qtx11extras
+  [  SDL SDL_image a52dec alsaLib avahi bzip2 dbus faad2 ffmpeg flac fluidsynth
+    fribidi gnutls libarchive libass libbluray libcaca libcddb libdc1394
+    libdvbpsi libdvdnav libdvdnav.libdvdread libebml libgcrypt libgpgerror
+    libkate libmad libmatroska libmtp libnfs liboggz libopus libpulseaudio
+    libraw1394 librsvg libsamplerate libshout libssh2 libtheora libtiger libupnp libnotify libsecret
+    libv4l libva libvdpau libvorbis libxml2 live555 lua5_1 mpeg2dec opencv perl
+    samba schroedinger speex taglib udev unzip xorg.libXpm xorg.libXv
+    xorg.libXvMC xorg.xcbutilkeysyms xorg.xlibsWrapper xz zlib ]
+    ++ optionals (qt5 != null) (with qt5; [ qtbase qtsvg qtx11extras ])
     ++ optional jackSupport libjack2;
 
-  nativeBuildInputs = [ pkgconfig ];
+  nativeBuildInputs = [ pkgconfig gettext ];
 
-  LIVE555_PREFIX = live555;
+  #  LIVE555_PREFIX = live555;
 
   preConfigure = ''
     sed -e "s@/bin/echo@echo@g" -i configure
-  '' + optionalString withQt5 ''
-    # Make sure we only *add* "-std=c++11" to CXXFLAGS instead of overriding the
-    # values figured out by configure (for example "-g -O2").
-    sed -i -re '/^ *CXXFLAGS=("[^$"]+")? *$/s/CXXFLAGS="?/&-std=c++11 /' \
-      configure
   '';
 
   configureFlags =
@@ -74,10 +61,16 @@ stdenv.mkDerivation rec {
   enableParallelBuilding = true;
 
   preBuild = ''
-    substituteInPlace modules/text_renderer/freetype.c --replace \
-      /usr/share/fonts/truetype/freefont/FreeSerifBold.ttf \
-      ${freefont_ttf}/share/fonts/truetype/FreeSerifBold.ttf
+    #./config.status share/vlc.appdata.xml.in
+    #(cd share; make vlc.appdata.xml)
+    #exit 1
   '';
+
+  #  preBuild = ''
+  #    substituteInPlace modules/text_renderer/freetype.c --replace \
+  #      /usr/share/fonts/truetype/freefont/FreeSerifBold.ttf \
+  #      ${freefont_ttf}/share/fonts/truetype/FreeSerifBold.ttf
+  #  '';
 
   meta = with stdenv.lib; {
     description = "Cross-platform media player and streaming server";

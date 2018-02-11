@@ -11206,12 +11206,6 @@ with pkgs;
 
     telepathy = callPackage ../development/libraries/telepathy/qt { };
 
-    vlc = lowPrio (callPackage ../applications/video/vlc {
-      qt4 = null;
-      withQt5 = true;
-      ffmpeg = ffmpeg_2;
-    });
-
     qtwebkit-plugins = callPackage ../development/libraries/qtwebkit-plugins { };
 
   };
@@ -18166,7 +18160,6 @@ with pkgs;
   vkeybd = callPackage ../applications/audio/vkeybd {};
 
   vlc = callPackage ../applications/video/vlc {
-    ffmpeg = ffmpeg_2;
     libva = libva-full; # also wants libva-x11
   };
 
