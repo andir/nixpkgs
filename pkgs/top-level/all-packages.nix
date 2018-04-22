@@ -2529,6 +2529,10 @@ with pkgs;
   gnupg22 = callPackage ../tools/security/gnupg/22.nix {
     pinentry = if stdenv.isDarwin then pinentry_mac else pinentry;
   };
+  gnupg225 = callPackage ../tools/security/gnupg/225.nix {
+    pinentry = if stdenv.isDarwin then pinentry_mac else pinentry;
+  };
+
   gnupg = gnupg22;
 
   gnuplot = libsForQt5.callPackage ../tools/graphics/gnuplot { };
@@ -16955,8 +16959,15 @@ with pkgs;
 
   notbit = callPackage ../applications/networking/mailreaders/notbit { };
 
-  notmuch = callPackage ../applications/networking/mailreaders/notmuch {
-    gmime = gmime3;
+  notmuch = let
+    gmime = gmime3.override {
+      gpgme = gpgme.override {
+        gnupg = gnupg225;
+      };
+    };
+  in callPackage ../applications/networking/mailreaders/notmuch {
+    gmime = gmime;
+    gnupg = gnupg225;
   };
 
   notmuch-mutt = callPackage ../applications/networking/mailreaders/notmuch/mutt.nix { };
