@@ -15,6 +15,10 @@ stdenv.mkDerivation rec {
     "gt_cv_func_CFLocaleCopyCurrent=no"
   ];
 
+  patches = [
+    ./allow-remote.patch
+  ];
+
   # gnutar tries to call into gettext between `fork` and `exec`,
   # which is not safe on darwin.
   # see http://article.gmane.org/gmane.os.macosx.fink.devel/21882

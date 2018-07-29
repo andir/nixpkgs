@@ -1,0 +1,89 @@
+Only in tar-1.30-a: allow-remote.patch
+diff -U3 -r tar-1.30/doc/tar.1 tar-1.30-a/doc/tar.1
+--- tar-1.30/doc/tar.1	2017-12-16 22:23:12.000000000 +0100
++++ tar-1.30-a/doc/tar.1	2018-07-29 22:35:02.985256220 +0200
+@@ -657,8 +657,9 @@
+ .B \-\-rmt\-command
+ option.
+ .TP
+-\fB\-\-force\-local\fR
+-Archive file is local even if it has a colon.
++\fB\-\-allow\-remote\fR
++Archive file is allowed to be remote, otherwise even with a colon it will
++treaten as a local file.
+ .TP
+ \fB\-F\fR, \fB\-\-info\-script\fR=\fICOMMAND\fR, \fB\-\-new\-volume\-script\fR=\fICOMMAND\fR
+ Run \fICOMMAND\fR at the end of each tape (implies \fB\-M\fR).  The
+diff -U3 -r tar-1.30/lib/rmt.h tar-1.30-a/lib/rmt.h
+--- tar-1.30/lib/rmt.h	2015-08-24 09:38:07.000000000 +0200
++++ tar-1.30-a/lib/rmt.h	2018-07-29 22:22:50.416162928 +0200
+@@ -27,16 +27,16 @@
+ off_t rmt_lseek__ (int, off_t, int);
+ int rmt_ioctl__ (int, int, char *);
+ 
+-extern bool force_local_option;
++extern bool allow_remote_option;
+ 
+ /* A filename is remote if it contains a colon not preceded by a slash,
+    to take care of `/:/' which is a shorthand for `/.../<CELL-NAME>/fs'
+    on machines running OSF's Distributing Computing Environment (DCE) and
+-   Distributed File System (DFS).  However, when --force-local, a
+-   filename is never remote.  */
++   Distributed File System (DFS).  However, only when --remote-only, a
++   filename is treated as remote.  */
+ 
+ #define _remdev(dev_name) \
+-  (!force_local_option && (rmt_dev_name__ = strchr (dev_name, ':')) \
++  (allow_remote_option && (rmt_dev_name__ = strchr (dev_name, ':')) \
+    && rmt_dev_name__ > (dev_name) \
+    && ! memchr (dev_name, '/', rmt_dev_name__ - (dev_name)))
+ 
+diff -U3 -r tar-1.30/lib/rtapelib.c tar-1.30-a/lib/rtapelib.c
+--- tar-1.30/lib/rtapelib.c	2015-08-24 09:38:07.000000000 +0200
++++ tar-1.30-a/lib/rtapelib.c	2018-07-29 22:24:07.523408621 +0200
+@@ -95,9 +95,9 @@
+ /* Temporary variable used by macros in rmt.h.  */
+ char const *rmt_dev_name__;
+ 
+-/* If true, always consider file names to be local, even if they contain
++/* If false,  consider file names to be local, even if they contain
+    colons */
+-bool force_local_option;
++bool allow_remote_option;
+ 
+ 
+ 
+diff -U3 -r tar-1.30/src/tar.c tar-1.30-a/src/tar.c
+--- tar-1.30/src/tar.c	2017-12-16 22:23:12.000000000 +0100
++++ tar-1.30-a/src/tar.c	2018-07-29 22:36:08.954443290 +0200
+@@ -280,7 +280,7 @@
+   DELAY_DIRECTORY_RESTORE_OPTION,
+   HARD_DEREFERENCE_OPTION,
+   DELETE_OPTION,
+-  FORCE_LOCAL_OPTION,
++  ALLOW_REMOTE_OPTION,
+   FULL_TIME_OPTION,
+   GROUP_OPTION,
+   GROUP_MAP_OPTION,
+@@ -583,8 +583,8 @@
+ 
+   {"file", 'f', N_("ARCHIVE"), 0,
+    N_("use archive file or device ARCHIVE"), GRID+1 },
+-  {"force-local", FORCE_LOCAL_OPTION, 0, 0,
+-   N_("archive file is local even if it has a colon"), GRID+1 },
++  {"allow-remote", ALLOW_REMOTE_OPTION, 0, 0,
++   N_("archive file is allow to be a remote file even it it has a colon"), GRID+1 },
+   {"rmt-command", RMT_COMMAND_OPTION, N_("COMMAND"), 0,
+    N_("use given rmt COMMAND instead of rmt"), GRID+1 },
+   {"rsh-command", RSH_COMMAND_OPTION, N_("COMMAND"), 0,
+@@ -1711,8 +1711,8 @@
+       set_subcommand_option (DELETE_SUBCOMMAND);
+       break;
+ 
+-    case FORCE_LOCAL_OPTION:
+-      force_local_option = true;
++    case ALLOW_REMOTE_OPTION:
++      allow_remote_option = true;
+       break;
+ 
+     case 'H':
