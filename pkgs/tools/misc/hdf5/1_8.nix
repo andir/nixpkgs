@@ -23,11 +23,11 @@ assert fortran2003 -> gfortran != null;
 let inherit (stdenv.lib) optional optionals; in
 
 stdenv.mkDerivation rec {
-  version = "1.8.19";
+  version = "1.8.21";
   name = "hdf5-${version}";
   src = fetchurl {
     url = "https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.8/${name}/src/${name}.tar.bz2";
-    sha256 = "0f3jfbqpaaq21ighi40qzs52nb52kc2d2yjk541rjmsx20b3ih2r" ;
+    sha256 = "03glk4w4wyb1jyb443g53y3y1ncnf6mj2cqwm6avfr2awkgb3cg5" ;
  };
 
   passthru = {
