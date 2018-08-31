@@ -23,6 +23,10 @@ stdenv.mkDerivation rec {
     license = licenses.asl20;
     platforms = platforms.all;
     maintainers = [ maintainers.rickynils maintainers.domenkozar ];
+    knownVulnerabilities = [
+      "CVE-2016-3163 - see https://github.com/NixOS/nixpkgs/issues/33876"
+      "CVE-2017-12629 - see https://github.com/NixOS/nixpkgs/issues/33876"
+    ];
   };
 
 }
