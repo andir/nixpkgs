@@ -12405,7 +12405,7 @@ with pkgs;
 
   wcslib = callPackage ../development/libraries/wcslib { };
 
-  webkitgtk = webkitgtk220x;
+  webkitgtk = webkitgtk222x;
 
   webkitgtk24x-gtk3 = callPackage ../development/libraries/webkitgtk/2.4.nix {
     harfbuzz = harfbuzzFull.override {
@@ -12415,7 +12415,7 @@ with pkgs;
     inherit (darwin) libobjc;
   };
 
-  webkitgtk220x = callPackage ../development/libraries/webkitgtk/2.20.nix {
+  webkitgtk222x = callPackage ../development/libraries/webkitgtk/2.22.nix {
     harfbuzz = harfbuzzFull;
     inherit (gst_all_1) gst-plugins-base gst-plugins-bad;
     stdenv = overrideCC stdenv gcc6;
