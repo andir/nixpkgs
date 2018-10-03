@@ -1,0 +1,13 @@
+diff -u -r rustc-1.27.0-src-orig/src/liballoc/str.rs rustc-1.27.0-src/src/liballoc/str.rs
+--- rustc-1.27.0-src-orig/src/liballoc/str.rs   2018-06-01 22:40:11.000000000 +0200
++++ rustc-1.27.0-src/src/liballoc/str.rs        2018-10-02 23:32:09.232556713 +0200
+@@ -2077,7 +2077,7 @@
+         // and `rem` is the remaining part of `n`.
+
+         // Using `Vec` to access `set_len()`.
+-        let mut buf = Vec::with_capacity(self.len() * n);
++        let mut buf = Vec::with_capacity(self.len().checked_mul(n).expect("capacity overflow"));
+
+         // `2^expn` repetition is done by doubling `buf` `expn`-times.
+         buf.extend(self.as_bytes());
+

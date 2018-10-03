@@ -26,6 +26,10 @@ in rec {
       # Comments in the test suggest that some non-reproducible environment
       # variables such $RANDOM can make it fail.
       ./patches/disable-test-inherit-env.patch
+
+      # patch for the buffer overflow in str::repeat:
+      # https://groups.google.com/d/msg/rustlang-security-announcements/CmSuTm-SaU0/AzVznVcTCgAJ
+      ./patches/std-string-buffer-overflow.patch
     ];
 
     forceBundledLLVM = true;
