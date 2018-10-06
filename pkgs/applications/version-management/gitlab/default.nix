@@ -117,6 +117,23 @@ stdenv.mkDerivation rec {
     homepage = http://www.gitlab.com/;
     platforms = platforms.linux;
     maintainers = with maintainers; [ fpletz globin krav ];
+    knownVulnerabilities = [
+      # https://about.gitlab.com/2018/10/05/critical-security-release-11-3-4/"
+      "CVE-2018-17939 - disclosure of user data"
+      "CVE-2018-17976 - leaking private project namespaces"
+      "CVE-2018-17975 - leaking confidential issue titles & private snippet titles"
+      # https://about.gitlab.com/2018/10/01/security-release-gitlab-11-dot-3-dot-1-released/
+      "CVE-2018-17450 - SSRF"
+      "CVE-2018-17454 - XSS in issue detail page"
+      "CVE-2018-15472 - DoS in diff formatting"
+      "CVE-2018-17449 - disclosure of confidential data via events API"
+      "CVE-2018-17452 - SSRF"
+      "CVE-2018-17451 - Slack integration CSRF allows issuing slash commands on behalf of a victim"
+      "CVE-2018-17453 - access token disclosure in sentry logs"
+      "CVE-2018-17455 - disclosure of private group names, avatars, LDAP settings and descriptions in merge request approval component"
+      "CVE-2018-17537 - XSS due to blog-viewer rendering package.json without input validation"
+      "CVE-2018-17536 - XSS due to lack of input validation in merge request page"
+    ];
   } // (if gitlabEnterprise then
     {
       license = licenses.unfreeRedistributable; # https://gitlab.com/gitlab-org/gitlab-ee/raw/master/LICENSE
