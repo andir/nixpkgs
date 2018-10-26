@@ -6,11 +6,11 @@
 
 let
   rustPlatform = recurseIntoAttrs (makeRustPlatform (callPackage ./bootstrap.nix {}));
-  version = "1.29.1";
-  cargoVersion = "1.29.1";
+  version = "1.30.0";
+  cargoVersion = "1.30.0";
   src = fetchurl {
     url = "https://static.rust-lang.org/dist/rustc-${version}-src.tar.gz";
-    sha256 = "0jd3c57x3yndizns4pb68nh25si47agfmrdvf9nwwsyfcs5p5c7i";
+    sha256 = "0jd3c57x4yndizns4pb68nh25si47agfmrdvf9nwwsyfcs5p5c7i";
   };
 in rec {
   rustc = callPackage ./rustc.nix {
