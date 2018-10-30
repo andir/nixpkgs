@@ -24,10 +24,10 @@ in stdenv.mkDerivation rec {
   # When updating, use https://github.com/systemd/systemd-stable tree, not the development one!
   # Also fresh patches should be cherry-picked from that tree to our current one.
   src = fetchFromGitHub {
-    owner = "NixOS";
+    owner = "andir";
     repo = "systemd";
-    rev = "31859ddd35fc3fa82a583744caa836d356c31d7f";
-    sha256 = "1xci0491j95vdjgs397n618zii3sgwnvanirkblqqw6bcvcjvir1";
+    rev = "9a30393449a3ff8577890a76d97a41317c914f6f";
+    sha256 = "1rzl0iqrpa4ajvama5k3cb3yc7893c55kzcxkl3cyavpdzsw5505";
   };
 
   outputs = [ "out" "lib" "man" "dev" ];
@@ -91,6 +91,7 @@ in stdenv.mkDerivation rec {
     "-Dsulogin-path=${utillinux}/bin/sulogin"
     "-Dmount-path=${utillinux}/bin/mount"
     "-Dumount-path=${utillinux}/bin/umount"
+    "-Ddns-over-tls=false"
   ];
 
   preConfigure = ''
