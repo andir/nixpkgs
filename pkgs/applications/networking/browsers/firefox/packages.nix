@@ -44,6 +44,32 @@ rec {
     };
   } {};
 
+  firefox-beta = common rec {
+    pname = "firefox";
+    version = "65.0b12";
+    src = fetchurl {
+      url = "mirror://mozilla/firefox/releases/${version}/source/firefox-${version}.source.tar.xz";
+      sha512 = "0f3qy2r9ykb29sv7npwsgir22kybsl24i41abjl1cxsh63dhi9zp9h6k1l4gycrwz6wz9h5hhxalmjkcz3g1nxpijm1dzkqwx0rklrv";
+    };
+
+    patches = nixpkgsPatches ++ [
+      ./no-buildconfig-ffx65.patch
+    ];
+
+    extraNativeBuildInputs = [ python3 ];
+
+    meta = {
+      description = "A web browser built from Firefox source tree";
+      homepage = http://www.mozilla.com/en-US/firefox/;
+      maintainers = with lib.maintainers; [ eelco ];
+      platforms = lib.platforms.unix;
+      license = lib.licenses.mpl20;
+    };
+    updateScript = callPackage ./update.nix {
+      attrPath = "firefox-unwrapped";
+    };
+  } {};
+
   firefox-esr-52 = common rec {
     pname = "firefox-esr";
     version = "52.9.0esr";
