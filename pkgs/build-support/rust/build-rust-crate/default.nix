@@ -76,6 +76,8 @@ let
     buildInputs_ = buildInputs;
     propagatedBuildInputs_ = propagatedBuildInputs;
     extraRustcOpts_ = extraRustcOpts;
+
+    prepareDeps = deps: lib.flip map deps (dep: dep.override { inherit rust release verbose crateOverrides; stdenv = stdenv_; });
 in
 stdenv_.mkDerivation (rec {
 
@@ -95,15 +97,8 @@ stdenv_.mkDerivation (rec {
         ((crate.propagatedBuildInputs or []) ++ propagatedBuildInputs_)
         dependencies_;
 
-    dependencies =
-      builtins.map
-        (dep: dep.override { rust = rust; release = release; verbose = verbose; crateOverrides = crateOverrides; stdenv = stdenv_; })
-        dependencies_;
-
-    buildDependencies =
-      builtins.map
-        (dep: dep.override { rust = rust; release = release; verbose = verbose; crateOverrides = crateOverrides; stdenv = stdenv_; })
-        buildDependencies_;
+    dependencies = prepareDeps dependencies_;
+    buildDependencies = prepareDeps buildDependencies_;
 
     completeDeps = lib.lists.unique (dependencies ++ lib.lists.concatMap (dep: dep.completeDeps) dependencies);
     completeBuildDeps = lib.lists.unique (
