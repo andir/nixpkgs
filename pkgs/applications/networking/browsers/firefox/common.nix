@@ -95,14 +95,14 @@ let
   browserPatches = [
     ./env_var_for_system_dir.patch
   ] ++ lib.optionals (stdenv.isAarch64 && lib.versionAtLeast ffversion "66") [
-    (fetchpatch {
-      url = "https://raw.githubusercontent.com/archlinuxarm/PKGBUILDs/09c7fa0dc1d87922e3b464c0fa084df1227fca79/extra/firefox/arm.patch";
-      sha256 = "1vbpih23imhv5r3g21m3m541z08n9n9j1nvmqax76bmyhn7mxp32";
-    })
-    (fetchpatch {
-      url = "https://raw.githubusercontent.com/archlinuxarm/PKGBUILDs/09c7fa0dc1d87922e3b464c0fa084df1227fca79/extra/firefox/build-arm-libopus.patch";
-      sha256 = "1zg56v3lc346fkzcjjx21vjip2s9hb2xw4pvza1dsfdnhsnzppfp";
-    })
+#    (fetchpatch {
+#      url = "https://raw.githubusercontent.com/archlinuxarm/PKGBUILDs/09c7fa0dc1d87922e3b464c0fa084df1227fca79/extra/firefox/arm.patch";
+#      sha256 = "1vbpih23imhv5r3g21m3m541z08n9n9j1nvmqax76bmyhn7mxp32";
+#    })
+#    (fetchpatch {
+#      url = "https://raw.githubusercontent.com/archlinuxarm/PKGBUILDs/09c7fa0dc1d87922e3b464c0fa084df1227fca79/extra/firefox/build-arm-libopus.patch";
+#      sha256 = "1zg56v3lc346fkzcjjx21vjip2s9hb2xw4pvza1dsfdnhsnzppfp";
+#    })
   ] ++ patches;
 
 in
@@ -170,6 +170,7 @@ stdenv.mkDerivation rec {
     ++ lib.optional gtk3Support wrapGAppsHook
     ++ lib.optionals stdenv.isDarwin [ xcbuild rsync ]
     ++ lib.optionals (lib.versionAtLeast ffversion "63.0") [ rust-cbindgen nodejs ]
+    ++ lib.optionals (lib.versionAtLeast ffversion "67") [ llvmPackages.llvm ]
     ++ extraNativeBuildInputs;
 
   preConfigure = ''
@@ -253,7 +254,6 @@ stdenv.mkDerivation rec {
   ++ lib.optionals (lib.versionAtLeast ffversion "57") [
     "--enable-webrender=build"
   ]
-
   # TorBrowser patches these
   ++ lib.optionals (!isTorBrowserLike) [
     "--with-system-nspr"
