@@ -115,8 +115,8 @@ in rec {
   };
 
   asterisk_15 = common {
-    version = "15.7.0";
-    sha256 = "1ngs73h4lz94b4f3shy1yb5laqy0z03zf451xa1nihrgp1h3ilyv";
+    version = "15.7.2";
+    sha256 = "1a4hdih7qri42dpr4hxgja5fhqck939xalrnin2wx9wqs90771wi";
     externals = {
       "externals_cache/pjproject-2.8.tar.bz2" = pjproject_2_8;
       "addons/mp3" = mp3-202;
