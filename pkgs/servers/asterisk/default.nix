@@ -1,4 +1,4 @@
-{ stdenv, lib, fetchurl, fetchsvn,
+{ stdenv, lib, fetchurl, fetchsvn, fetchpatch,
   jansson, libxml2, libxslt, ncurses, openssl, sqlite,
   utillinux, dmidecode, libuuid, newt,
   lua, speex,
@@ -6,7 +6,9 @@
 }:
 
 let
-  common = {version, sha256, externals}: stdenv.mkDerivation rec {
+
+
+  common = {version, sha256, externals, patches ? []}: let _patches = patches; in stdenv.mkDerivation rec {
     inherit version;
     name = "asterisk-${version}";
 
@@ -18,7 +20,7 @@ let
       # This patch changes the runtime behavior to look for state
       # directories in /var rather than ${out}/var.
       ./runtime-vardirs.patch
-    ];
+    ] ++ _patches;
 
     # Disable MD5 verification for pjsip
     postPatch = ''
@@ -99,6 +101,29 @@ in
       "externals_cache/pjproject-2.7.1.tar.bz2" = pjproject-27;
       "addons/mp3" = mp3-202;
     };
+
+    patches = [
+      # https://downloads.asterisk.org/pub/security/AST-2018-008.html
+      (fetchpatch {
+        name = "CVE-2018-12227.patch";
+        url = https://downloads.asterisk.org/pub/security/AST-2018-008-15.diff;
+        sha256 = "070wfyldz8wfm5rjgz43jckdmr118135fqdjyibwf066263fq6k2";
+      })
+
+      # https://downloads.asterisk.org/pub/security/AST-2018-010.html
+      (fetchpatch {
+        name = "CVE-2018-19278.patch";
+        url = https://downloads.asterisk.org/pub/security/AST-2018-010-15.diff;
+        sha256 = "18iaxj6f6pnbv4prg8ql83h4c8ap28mpfswrhfkr510mf58144sk";
+      })
+
+      # https://downloads.asterisk.org/pub/security/AST-2019-001.html<Paste>
+      (fetchpatch {
+        name = "CVE-2019-7251.patch";
+        url = https://downloads.asterisk.org/pub/security/AST-2019-001-15.diff;
+        sha256 = "0viz2bmc273im1gqydayi8hw91fcwshn61pwz91xp8ambbg1584i";
+      })
+    ];
   };
 
   # asterisk-git = common {
