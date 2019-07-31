@@ -3435,6 +3435,8 @@ in
 
   google-music-scripts = callPackage ../tools/audio/google-music-scripts { };
 
+  google-cloud-cpp = callPackage ../development/libraries/google-cloud-cpp { };
+
   gopro = callPackage ../tools/video/gopro { };
 
   gource = callPackage ../applications/version-management/gource { };
