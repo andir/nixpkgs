@@ -180,7 +180,7 @@ let
     (assertValueOneOf "IPv6AcceptRA" boolValues)
     (assertValueOneOf "IPv4ProxyARP" boolValues)
     (assertValueOneOf "IPv6ProxyNDP" boolValues)
-    (assertValueOneOf "IPv6PrefixDelegation" boolValues)
+    (assertValueOneOf "IPv6PrefixDelegation" (boolValues ++ ["static" "dhcpv6"]))
     (assertValueOneOf "ActiveSlave" boolValues)
     (assertValueOneOf "PrimarySlave" boolValues)
     (assertValueOneOf "ConfigureWithoutCarrier" boolValues)
@@ -210,15 +210,16 @@ let
     ])
   ];
 
-  checkDhcp = checkUnitConfig "DHCP" [
+  checkDhcpV4 = checkUnitConfig "DHCPv4" [
     (assertOnlyFields [
       "UseDNS" "UseNTP" "UseMTU" "Anonymize" "SendHostname" "UseHostname"
       "Hostname" "UseDomains" "UseRoutes" "UseTimezone" "CriticalConnection"
-      "ClientIdentifier" "VendorClassIdentifier" "UserClass" "DUIDType"
+      "ClientIdentifier" "VendorClassIdentifier" "UserClass" "MaxAttempts" "DUIDType"
       "DUIDRawData" "IAID" "RequestBroadcast" "RouteMetric" "RouteTable"
-      "ListenPort" "RapidCommit"
+      "ListenPort" "SendRelease" "BlackList"
     ])
     (assertValueOneOf "UseDNS" boolValues)
+    (assertValueOneOf "RoutesToDNS" boolValues)
     (assertValueOneOf "UseNTP" boolValues)
     (assertValueOneOf "UseMTU" boolValues)
     (assertValueOneOf "Anonymize" boolValues)
@@ -229,9 +230,45 @@ let
     (assertValueOneOf "UseTimezone" boolValues)
     (assertValueOneOf "CriticalConnection" boolValues)
     (assertValueOneOf "RequestBroadcast" boolValues)
+    (assertIntOr "MaxAttempts" ["infinity"])
     (assertInt "RouteTable")
     (assertMinimum "RouteTable" 0)
-    (assertValueOneOf "RapidCommit" boolValues)
+    (assertValueOneOf "SendRelease" boolValues)
+#    (assertValueOneOf "RapidCommit" boolValues) # v6 only
+  ];
+
+  checkDhcpV6 = checkUnitConfig "DHCPv6" [
+    (assertOnlyFields [
+      "UseDNS" "UseNTP" "RapidCommit" "ForceDHCPv6PDOtherInformation"
+    ])
+    (assertValueOneOf "UseDNS" boolValues)
+    (assertValueOneOf "UseNTP" boolValues)
+    (assertValueOneOf "ForceDHCPv6PDOtherInformation" boolValues)
+  ];
+
+  checkIpv6AcceptRA = checkUnitConfig "IPv6AcceptRA" [
+    (assertOnlyFields [
+      "UseDNS" "UseDomains" "RouteTable" "UseAutonomus"
+      "UseOnLinkPrefix" "BlackList"
+    ])
+    (assertValueOneOf "UseDNS" boolValues)
+    (assertValueOneOf "UseDomains" (boolValues ++ ["route"]))
+    (assertInt "RouteTable")
+    (assertMinimum "RouteTable" 0)
+    (assertValueOneOf "UseOnLinkPrefix" boolValues)
+  ];
+
+  checkIpv6PrefixDelegation = checkUnitConfig "IPv6PrefixDelegation" [
+    (assertOnlyFields [
+      "Managed" "OtherInformation" "RouterLifetimeSec" "RouterPreference"
+      "EmitDNS" "DNS" "EmotDomains" "Domains" "DNSLifetimeSec"
+    ])
+  ];
+
+  checkIpv6Prefix = checkUnitConfig "IPv6Prefix" [
+    (assertOnlyFields [
+      "AddressAutoconfiguration" "OnLink" "PreferredLifetime" "ValidLifetimeSec"
+    ])
   ];
 
   checkDhcpServer = checkUnitConfig "DHCPServer" [
@@ -255,7 +292,7 @@ let
     (assertValueOneOf "ARP" boolValues)
     (assertValueOneOf "Multicast" boolValues)
     (assertValueOneOf "Unmanaged" boolValues)
-    (assertValueOneOf "RequiredForOnline" boolValues)
+    (assertValueOneOf "RequiredForOnline" (boolValues ++ ["off" "no-carrier" "dormant" "degraded-carrier" "carrier" "degraded" "enslaved" "routable" "pending" "configuring" "configured" "unmanaged" "linger" ]))
   ];
 
 
@@ -434,6 +471,22 @@ let
     };
   };
 
+  ipv6PrefixOptions = {
+    options = {
+      ipv6PrefixConfig = mkOption {
+        default = {};
+        example = { Prefix = "2001:db8::/64"; };
+        type = types.addCheck (types.attrsOf unitOption) checkIpv6Prefix;
+        description = ''
+          Each attribute in this set specifies an option in the
+          <literal>[IPv6Prefix]</literal> section of the unit.  See
+          <citerefentry><refentrytitle>systemd.network</refentrytitle>
+          <manvolnum>5</manvolnum></citerefentry> for details.
+        '';
+      };
+    };
+  };
+
   routeOptions = {
     options = {
       routeConfig = mkOption {
@@ -464,14 +517,60 @@ let
       '';
     };
 
-    dhcpConfig = mkOption {
+    dhcpV4Config = mkOption {
       default = {};
       example = { UseDNS = true; UseRoutes = true; };
-      type = types.addCheck (types.attrsOf unitOption) checkDhcp;
+      type = types.addCheck (types.attrsOf unitOption) checkDhcpV4;
       description = ''
         Each attribute in this set specifies an option in the
-        <literal>[DHCP]</literal> section of the unit.  See
+        <literal>[DHCPv4]</literal> section of the unit.  See
         <citerefentry><refentrytitle>systemd.network</refentrytitle>
+        <manvolnum>5</manvolnum></citerefentry> for details.
+      '';
+    };
+
+    dhcpV6Config = mkOption {
+      default = {};
+      example = { UseDNS = true; };
+      type = types.addCheck (types.attrsOf unitOption) checkDhcpV6;
+      description = ''
+        Each attribute in this set specifies an option in the
+        <literal>[DHCPv6]</literal> section of the unit.  See
+        <citerefentry><refentrytitle>systemd.network</refentrytitle>
+        <manvolnum>5</manvolnum></citerefentry> for details.
+      '';
+    };
+
+    ipv6AcceptRAConfig = mkOption {
+      default = {};
+      example = { UseDNS = true; };
+      type = types.addCheck (types.attrsOf unitOption) checkIpv6AcceptRA;
+      description = ''
+        Each attribute in this set specifies an option in the
+        <literal>[IPv6AcceptRA]</literal> section of the unit.  See
+        <citerefentry><refentrytitle>systemd.network</refentrytitle>
+        <manvolnum>5</manvolnum></citerefentry> for details.
+      '';
+    };
+
+    ipv6PrefixDelegationConfig = mkOption {
+      default = {};
+      example = { UseDNS = true; };
+      type = types.addCheck (types.attrsOf unitOption) checkIpv6PrefixDelegation;
+      description = ''
+        Each attribute in this set specifies an option in the
+        <literal>[IPv6PrefixDelegation]</literal> section of the unit.  See
+        <citerefentry><refentrytitle>systemd.network</refentrytitle>
+        <manvolnum>5</manvolnum></citerefentry> for details.
+      '';
+    };
+
+    ipv6PrefixConfig = mkOption {
+      default = [ ];
+      type = with types; listOf (submodule ipv6PrefixOptions);
+      description = ''
+        A list of <literal>[IPv6Prefix]</literal> sections to be added to the
+        unit.  See <citerefentry><refentrytitle>systemd.network</refentrytitle>
         <manvolnum>5</manvolnum></citerefentry> for details.
       '';
     };
@@ -760,9 +859,14 @@ let
           ${concatStringsSep "\n" (map (s: "VXLAN=${s}") def.vxlan)}
           ${concatStringsSep "\n" (map (s: "Tunnel=${s}") def.tunnel)}
 
-          ${optionalString (def.dhcpConfig != { }) ''
-            [DHCP]
-            ${attrsToSection def.dhcpConfig}
+          ${optionalString (def.dhcpV4Config != { }) ''
+            [DHCPv4]
+            ${attrsToSection def.dhcpV4Config}
+
+          ''}
+          ${optionalString (def.dhcpV6Config != { }) ''
+            [DHCPv6]
+            ${attrsToSection def.dhcpV6Config}
 
           ''}
           ${optionalString (def.dhcpServerConfig != { }) ''
@@ -770,6 +874,23 @@ let
             ${attrsToSection def.dhcpServerConfig}
 
           ''}
+
+          ${optionalString (def.ipv6AcceptRAConfig != { }) ''
+            [IPv6AcceptRA]
+            ${attrsToSection def.ipv6AcceptRAConfig}
+
+          ''}
+          ${optionalString (def.ipv6PrefixDelegationConfig != { }) ''
+            [IPv6PrefixDelegation]
+            ${attrsToSection def.ipv6PrefixDelegationConfig}
+
+          ''}
+          ${flip concatMapStrings def.ipv6PrefixConfig (x: ''
+            [IPv6Prefix]
+            ${attrsToSection x.ipv6PrefixConfig}
+
+          '')}
+
           ${flip concatMapStrings def.addresses (x: ''
             [Address]
             ${attrsToSection x.addressConfig}
@@ -780,6 +901,7 @@ let
             ${attrsToSection x.routeConfig}
 
           '')}
+
           ${def.extraConfig}
         '';
     };

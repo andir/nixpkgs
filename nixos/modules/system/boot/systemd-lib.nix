@@ -59,6 +59,9 @@ in rec {
     optional (attr ? ${name} && ! isMacAddress attr.${name})
       "Systemd ${group} field `${name}' must be a valid mac address.";
 
+  assertIntOr = name: values: group: attr:
+    optional (attr ? ${name} && !elem attr.${name} values && !isInt attr.${name})
+      "Systemd ${group} field `${name}` must be an integer or one of `${concatMapStringsSep ", " ("\"${toString v}\"") values}`";
 
   assertValueOneOf = name: values: group: attr:
     optional (attr ? ${name} && !elem attr.${name} values)
