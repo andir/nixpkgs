@@ -21,6 +21,15 @@ let
       # This old version does not have updated test config for pytest 4,
       # and pypi tarball doesn't contain tests dir anyways.
       (pself: psuper: {
+        sentry-sdk = psuper.sentry-sdk.overridePythonAttrs (oldAttrs: rec {
+          version = "0.7.7";
+          src = oldAttrs.src.override {
+            inherit version;
+            sha256 = "0d79nwyjnjrjghrd7bzp9pn6ldbyi3g8dzh1r60nqh975nx1x965";
+          };
+          disabled = false;
+          doCheck = false;
+        });
         jinja2 = psuper.jinja2.overridePythonAttrs (oldAttrs: rec {
           version = "2.8.1";
           src = oldAttrs.src.override {
