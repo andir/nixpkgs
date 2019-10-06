@@ -8,12 +8,9 @@ in stdenv.mkDerivation rec {
   pname = "aqbanking";
   inherit version;
 
-  src = let
-    qstring = "package=03&release=${releaseId}&file=02";
-    mkURLs = map (base: "${base}/sites/download/download.php?${qstring}");
-  in fetchurl {
+  src = fetchurl {
     name = "${pname}-${version}.tar.gz";
-    urls = mkURLs [ "http://www.aquamaniac.de" "http://www2.aquamaniac.de" ];
+    url = "https://www.aquamaniac.de/rdm/attachments/download/${releaseId}/${pname}-${version}.tar.gz";
     inherit sha256;
   };
 
@@ -31,7 +28,7 @@ in stdenv.mkDerivation rec {
 
   meta = with stdenv.lib; {
     description = "An interface to banking tasks, file formats and country information";
-    homepage = http://www2.aquamaniac.de/sites/download/packages.php?package=03&showall=1;
+    homepage = https://www.aquamaniac.de/;
     hydraPlatforms = [];
     license = licenses.gpl2Plus;
     maintainers = with maintainers; [ goibhniu ];

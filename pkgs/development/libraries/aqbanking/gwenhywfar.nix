@@ -16,12 +16,9 @@ in stdenv.mkDerivation rec {
   pname = "gwenhywfar";
   inherit version;
 
-  src = let
-    qstring = "package=01&release=${releaseId}&file=02";
-    mkURLs = map (base: "${base}/sites/download/download.php?${qstring}");
-  in fetchurl {
+  src = fetchurl {
     name = "${pname}-${version}.tar.gz";
-    urls = mkURLs [ "http://www.aquamaniac.de" "http://www2.aquamaniac.de" ];
+    url = "https://www.aquamaniac.de/rdm/attachments/download/${releaseId}/${pname}-${version}.tar.gz";
     inherit sha256;
   };
 
