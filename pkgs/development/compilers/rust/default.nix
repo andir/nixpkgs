@@ -68,5 +68,38 @@
       clippy = self.callPackage ./clippy.nix { inherit Security; };
       rls = self.callPackage ./rls { inherit CoreFoundation Security; };
     });
+    unstable = lib.makeScope newScope (self: let
+      # Like `buildRustPackages`, but may also contain prebuilt binaries to
+      # break cycle. Just like `bootstrapTools` for nixpkgs as a whole,
+      # nothing in the final package set should refer to this.
+      bootstrapRustPackages = self.buildRustPackages.overrideScope' (_: _:
+        lib.optionalAttrs (stdenv.buildPlatform == stdenv.hostPlatform)
+          buildPackages.rust.packages.prebuilt);
+      bootRustPlatform = makeRustPlatform bootstrapRustPackages;
+    in {
+      # Packages suitable for build-time, e.g. `build.rs`-type stuff.
+      buildRustPackages = buildPackages.rust.packages.unstable;
+      # Analogous to stdenv
+      rustPlatform = makeRustPlatform self.buildRustPackages;
+      rustc = self.callPackage ./rustc.nix ({
+        # Use boot package set to break cycle
+        releaseChannel = "nightly";
+        rustPlatform = bootRustPlatform;
+      } // lib.optionalAttrs (stdenv.cc.isClang && stdenv.hostPlatform == stdenv.buildPlatform) {
+        stdenv = llvmPackages_5.stdenv;
+        pkgsBuildBuild = pkgsBuildBuild // { targetPackages.stdenv = llvmPackages_5.stdenv; };
+        pkgsBuildHost = pkgsBuildBuild // { targetPackages.stdenv = llvmPackages_5.stdenv; };
+        pkgsBuildTarget = pkgsBuildTarget // { targetPackages.stdenv = llvmPackages_5.stdenv; };
+      });
+      rustfmt = self.callPackage ./rustfmt.nix { inherit Security; };
+      cargo = self.callPackage ./cargo.nix {
+        # Use boot package set to break cycle
+        rustPlatform = bootRustPlatform;
+        inherit CoreFoundation Security;
+      };
+      clippy = self.callPackage ./clippy.nix { inherit Security; };
+      rls = self.callPackage ./rls { inherit CoreFoundation Security; };
+    });
+
   };
 }

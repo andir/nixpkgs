@@ -4,6 +4,7 @@
 , pkgconfig, openssl
 , which, libffi
 , withBundledLLVM ? false
+, releaseChannel ? "stable"
 }:
 
 let
@@ -16,12 +17,13 @@ let
 
   # For use at runtime
   llvmShared = llvm_7.override { enableSharedLibraries = true; };
+  _version = "1.38.0";
 in stdenv.mkDerivation rec {
   pname = "rustc";
-  version = "1.38.0";
+  version = "${_version}${if releaseChannel !="stable" then "-${releaseChannel}" else ""}";
 
   src = fetchurl {
-    url = "https://static.rust-lang.org/dist/rustc-${version}-src.tar.gz";
+    url = "https://static.rust-lang.org/dist/rustc-${_version}-src.tar.gz";
     sha256 = "101dlpsfkq67p0hbwx4acqq6n90dj4bbprndizpgh1kigk566hk4";
   };
 
@@ -61,7 +63,7 @@ in stdenv.mkDerivation rec {
     ccForTarget  = "${pkgsBuildTarget.targetPackages.stdenv.cc}/bin/${pkgsBuildTarget.targetPackages.stdenv.cc.targetPrefix}cc";
     cxxForTarget = "${pkgsBuildTarget.targetPackages.stdenv.cc}/bin/${pkgsBuildTarget.targetPackages.stdenv.cc.targetPrefix}c++";
   in [
-    "--release-channel=stable"
+    "--release-channel=${releaseChannel}"
     "--set=build.rustc=${rustPlatform.rust.rustc}/bin/rustc"
     "--set=build.cargo=${rustPlatform.rust.cargo}/bin/cargo"
     "--enable-rpath"

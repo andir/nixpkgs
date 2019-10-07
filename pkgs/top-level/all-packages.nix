@@ -8362,10 +8362,13 @@ in
     inherit (darwin.apple_sdk.frameworks) CoreFoundation Security;
   };
   rustPackages = rust.packages.stable;
+  rustUnstablePackages = rust.packages.unstable;
+
   inherit (rustPackages) cargo rustc rustPlatform;
   inherit (rust) makeRustPlatform;
 
   buildRustCrate = callPackage ../build-support/rust/build-rust-crate { };
+  buildUnstableRustCrate = callPackage ../build-support/rust/build-rust-crate { inherit (rustUnstablePackages) rustc; };
   buildRustCrateHelpers = callPackage ../build-support/rust/build-rust-crate/helpers.nix { };
   buildRustCrateTests = recurseIntoAttrs (callPackage ../build-support/rust/build-rust-crate/test { }).tests;
   cratesIO = callPackage ../build-support/rust/crates-io.nix { };
