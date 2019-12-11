@@ -4,7 +4,7 @@
 # This can be useful for deploying packages with NixOps, and to share
 # binary dependencies between projects.
 
-{ lib, stdenv, defaultCrateOverrides, fetchCrate, rustc, rust }:
+{ lib, stdenv, defaultCrateOverrides, fetchCrate, rustc, rust, writeScript }:
 
 let
     # This doesn't appear to be officially documented anywhere yet.
@@ -61,6 +61,7 @@ let
     configureCrate = import ./configure-crate.nix { inherit lib stdenv echo_build_heading noisily makeDeps; };
     buildCrate = import ./build-crate.nix { inherit lib stdenv echo_build_heading noisily makeDeps rust; };
     installCrate = import ./install-crate.nix;
+    checkCrate = import ./check-crate.nix { inherit writeScript; };
 
     in
 
@@ -68,7 +69,9 @@ crate_: lib.makeOverridable ({ rust, release, verbose, features, buildInputs, cr
   dependencies, buildDependencies, crateRenames,
   extraRustcOpts,
   preUnpack, postUnpack, prePatch, patches, postPatch,
-  preConfigure, postConfigure, preBuild, postBuild, preInstall, postInstall }:
+  preConfigure, postConfigure, preBuild, postBuild, preInstall, postInstall,
+  testCrate
+}:
 
 let crate = crate_ // (lib.attrByPath [ crate_.crateName ] (attr: {}) crateOverrides crate_);
     dependencies_ = dependencies;
@@ -91,7 +94,7 @@ stdenv.mkDerivation (rec {
         crate.src
       else
         fetchCrate { inherit (crate) crateName version sha256; };
-    name = "rust_${crate.crateName}-${crate.version}";
+    name = "rust_${crate.crateName}-${crate.version}${if testCrate != null then "-test" else ""}";
     depsBuildBuild = [ rust stdenv.cc ];
     buildInputs = (crate.buildInputs or []) ++ buildInputs_;
     dependencies =
@@ -160,6 +163,10 @@ stdenv.mkDerivation (rec {
     };
     installPhase = installCrate crateName metadata;
 
+    doCheck = crate ? testCrate;
+    checkPhase = if crate ? testCrate then checkCrate crate else null;
+    inherit testCrate;
+
     outputs = [ "out" "lib" ];
     outputDev = [ "lib" ];
 
@@ -186,4 +193,5 @@ stdenv.mkDerivation (rec {
   dependencies = crate_.dependencies or [];
   buildDependencies = crate_.buildDependencies or [];
   crateRenames = crate_.crateRenames or {};
+  testCrate = crate_.testCrate or null;
 }
