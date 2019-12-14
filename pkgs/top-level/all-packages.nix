@@ -8607,6 +8607,8 @@ in
   rustPackages_1_38_0 = rust_1_38_0.packages.stable;
   rustPackages = rustPackages_1_39_0;
 
+  mrustc = pkgs.callPackage ../development/compilers/rust/mrustc.nix { };
+
   inherit (rustPackages) cargo rustc rustPlatform;
   inherit (rust) makeRustPlatform;
 
