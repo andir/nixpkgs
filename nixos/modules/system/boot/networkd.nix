@@ -275,13 +275,13 @@ let
     ])
   ];
 
-  checkDhcp = checkUnitConfig "DHCP" [
+  checkDhcpV4 = checkUnitConfig "DHCPv4" [
     (assertOnlyFields [
       "UseDNS" "RoutesToDNS" "UseNTP" "UseMTU" "Anonymize" "SendHostname" "UseHostname"
       "Hostname" "UseDomains" "UseRoutes" "UseTimezone"
       "ClientIdentifier" "VendorClassIdentifier" "UserClass" "MaxAttempts"
       "DUIDType" "DUIDRawData" "IAID" "RequestBroadcast" "RouteMetric" "RouteTable"
-      "ListenPort" "SendRelease" "RapidCommit"
+      "ListenPort" "SendRelease"
     ])
     (assertValueOneOf "UseDNS" boolValues)
     (assertValueOneOf "RoutesToDNS" boolValues)
@@ -298,7 +298,6 @@ let
     (assertInt "RouteTable")
     (assertMinimum "RouteTable" 0)
     (assertValueOneOf "SendRelease" boolValues)
-    (assertValueOneOf "RapidCommit" boolValues)
   ];
 
   checkDhcpV6 = checkUnitConfig "DHCPv6" [
@@ -649,13 +648,13 @@ let
       '';
     };
 
-    dhcpConfig = mkOption {
+    dhcpV4Config = mkOption {
       default = {};
       example = { UseDNS = true; UseRoutes = true; };
-      type = types.addCheck (types.attrsOf unitOption) checkDhcp;
+      type = types.addCheck (types.attrsOf unitOption) checkDhcpV4;
       description = ''
         Each attribute in this set specifies an option in the
-        <literal>[DHCP]</literal> section of the unit.  See
+        <literal>[DHCPv4]</literal> section of the unit.  See
         <citerefentry><refentrytitle>systemd.network</refentrytitle>
         <manvolnum>5</manvolnum></citerefentry> for details.
       '';
@@ -998,9 +997,9 @@ let
           ${concatStringsSep "\n" (map (s: "Tunnel=${s}") def.tunnel)}
           ${concatStringsSep "\n" (map (s: "Xfrm=${s}") def.xfrm)}
 
-          ${optionalString (def.dhcpConfig != { }) ''
-            [DHCP]
-            ${attrsToSection def.dhcpConfig}
+          ${optionalString (def.dhcpV4Config != { }) ''
+            [DHCPv4]
+            ${attrsToSection def.dhcpV4Config}
 
           ''}
           ${optionalString (def.dhcpV6Config != {}) ''
