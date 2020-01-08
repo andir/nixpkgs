@@ -299,6 +299,16 @@ environment.systemPackages = [
        See <citerefentry><refentrytitle>systemd.network</refentrytitle>
        <manvolnum>5</manvolnum></citerefentry> for details.
      </para>
+    <para>
+     The <literal>systemd-networkd</literal> option
+     <literal>systemd.network.networks._name_.dhcpConfig</literal>
+     has been renamed to
+     <xref linked="opt-systemd.network.networks._name_.dhcpv4Config">
+      systemd.network.networks.&lt;name&gt;.dhcpv4Config
+     </xref> following upstream systemds documentation change.
+     See <citerefentry><refentrytitle>systemd.network</refentrytitle>
+     <manvolnum>5</manvolnum></citerefentry> for details.
+    </para>
    </listitem>
   </itemizedlist>
  </section>
