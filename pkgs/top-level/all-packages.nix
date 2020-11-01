@@ -244,6 +244,8 @@ in
 
   nix-prefetch-docker = callPackage ../build-support/docker/nix-prefetch-docker.nix { };
 
+  dnssec-trigger = callPackage ../tools/networking/dnssec-trigger { };
+
   docker-compose = python3Packages.callPackage ../applications/virtualization/docker-compose {};
 
   docker-ls = callPackage ../tools/misc/docker-ls { };

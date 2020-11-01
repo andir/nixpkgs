@@ -1,0 +1,26 @@
+From c4be2de56d66c08382a959babd1e9cd2d2fba859 Mon Sep 17 00:00:00 2001
+From: Andreas Rammhold <andreas@rammhold.de>
+Date: Mon, 2 Nov 2020 00:39:07 +0100
+Subject: [PATCH] NixOS: make the runtime path for the dnssec-trigger-script
+ configurable
+
+---
+ dnssec-trigger-script.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/dnssec-trigger-script.in b/dnssec-trigger-script.in
+index 6dd3503..c57dc1e 100755
+--- a/dnssec-trigger-script.in
++++ b/dnssec-trigger-script.in
+@@ -34,7 +34,7 @@ log.addHandler(logging.handlers.SysLogHandler())
+ log.addHandler(logging.StreamHandler())
+ 
+ # NetworkManager reportedly doesn't pass the PATH environment variable.
+-os.environ['PATH'] = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
++os.environ['PATH'] = "@nixosRuntimePath@"
+ 
+ # maximum negative cache TTL set by dnssec-trigger script on setup
+ UNBOUND_MAX_NEG_CACHE_TTL = 5
+-- 
+2.28.0
+
