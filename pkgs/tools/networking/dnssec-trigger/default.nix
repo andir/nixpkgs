@@ -15,6 +15,11 @@
 , unbound # for unbound-control (also runtime dep)
 , gtk2
 }:
+let
+  python = python3.withPackages (p: [
+    p.pygobject3
+  ]);
+in
 stdenv.mkDerivation rec {
   pname = "dnssec-trigger";
   version = "0.17";
@@ -51,12 +56,13 @@ stdenv.mkDerivation rec {
     ldns
     unbound
     gtk2
-    python3 # required so the python scripts are patched with the proper shebang
+    python # required so the python scripts are patched with the proper shebang
   ];
 
   configureFlags = [
     "--with-ssl=${openssl.dev}"
     "--with-hooks=networkmanager"
+    "--with-python=${python}/bin/python"
   ];
 
   installFlags = [
