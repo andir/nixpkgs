@@ -63,6 +63,7 @@ stdenv.mkDerivation rec {
     "--with-ssl=${openssl.dev}"
     "--with-hooks=networkmanager"
     "--with-python=${python}/bin/python"
+    "--prefix=/"
   ];
 
   installFlags = [
