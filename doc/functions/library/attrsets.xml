@@ -1677,8 +1677,7 @@ recursiveUpdate
   <xi:include href="./locations.xml" xpointer="lib.attrsets.recurseIntoAttrs" />
 
   <para>
-   Make various Nix tools consider the contents of the resulting
-   attribute set when looking for what to build, find, etc.
+   Make various Nix tools consider the contents of the resulting attribute set when looking for what to build, find, etc.
   </para>
 
   <para>
@@ -1710,5 +1709,4 @@ recursiveUpdate
 ]]></programlisting>
   </example>
  </section>
-
 </section>

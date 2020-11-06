@@ -4,6 +4,17 @@ let
   functionDocs = import ./lib-function-docs.nix { inherit locationsXml pkgs; };
   version = pkgs.lib.version;
 
+
+  trivialBuildersLocationsXML = import ./lib-function-locations.nix { inherit pkgs nixpkgs; prefix = "trivialBuilders"; attrPath = [ "trivialBuilders" ]; };
+  trivialBuildersDocs = import ./lib-function-docs.nix {
+    locationsXml = trivialBuildersLocationsXML;
+    inherit pkgs;
+    src = ./../../pkgs/build-support;
+    targets = {
+      "trivial-builders" = "Trivial Builders";
+    };
+  };
+
   epub-xsl = pkgs.writeText "epub.xsl" ''
     <?xml version='1.0'?>
     <xsl:stylesheet
@@ -30,6 +41,9 @@ in pkgs.runCommand "doc-support" {}
     cd result
     ln -s ${locationsXml} ./function-locations.xml
     ln -s ${functionDocs} ./function-docs
+
+    ln -s ${trivialBuildersLocationsXML} ./trivial-builders-locations.xml
+    ln -s ${trivialBuildersDocs} ./trivial-builders-docs
 
     ln -s ${pkgs.docbook5}/xml/rng/docbook/docbook.rng ./docbook.rng
     ln -s ${pkgs.docbook_xsl_ns}/xml/xsl ./xsl

@@ -21,7 +21,7 @@ fix-misc-xml:
 
 .PHONY: clean
 clean:
-	rm -f ${MD_TARGETS} doc-support/result .version manual-full.xml functions/library/locations.xml functions/library/generated
+	rm -f ${MD_TARGETS} doc-support/result .version manual-full.xml functions/library/locations.xml functions/library/generated builders/trivial-builders-generated
 	rm -rf ./out/ ./highlightjs
 
 .PHONY: validate
@@ -71,7 +71,7 @@ highlightjs: doc-support/result
 	cp -r doc-support/result/highlightjs/loader.js highlightjs/
 
 
-manual-full.xml: ${MD_TARGETS} .version functions/library/locations.xml functions/library/generated *.xml **/*.xml **/**/*.xml
+manual-full.xml: ${MD_TARGETS} .version functions/library/locations.xml functions/library/trivial-builders-locations.xml functions/library/generated builders/trivial-builders-generated *.xml **/*.xml **/**/*.xml
 	xmllint --nonet --xinclude --noxincludenode manual.xml --output manual-full.xml
 
 .version: doc-support/result
@@ -80,11 +80,17 @@ manual-full.xml: ${MD_TARGETS} .version functions/library/locations.xml function
 doc-support/result: doc-support/default.nix
 	(cd doc-support; nix-build)
 
-functions/library/locations.xml: doc-support/result
-	ln -rfs ./doc-support/result/function-locations.xml functions/library/locations.xml
+builders/locations.xml: doc-support/result
+	ln -rfs ./doc-support/result/function-locations.xml builders/locations.xml
+
+functions/library/trivial-builders-locations.xml: doc-support/result
+	ln -rfs ./doc-support/result/trivial-builders-locations.xml functions/library/tirival-builders-locations.xml
 
 functions/library/generated: doc-support/result
 	ln -rfs ./doc-support/result/function-docs functions/library/generated
+
+builders/trivial-builders-generated: doc-support/result
+	ln -rfs ./doc-support/result/trivial-builders-docs builders/trivial-builders-generated
 
 %.section.xml: %.section.md
 	pandoc $^ -w docbook \

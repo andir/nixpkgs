@@ -8,16 +8,10 @@
  </para>
 
  <section xml:id="sec-urxvt-conf">
-
   <title>Configuring urxvt</title>
 
   <para>
-   In <literal>nixpkgs</literal>, urxvt is provided by the package
-   <literal>rxvt-unicode</literal>. It can be configured to include your choice
-   of plugins, reducing its closure size from the default configuration which
-   includes all available plugins. To make use of this functionality, use an
-   overlay or directly install an expression that overrides its configuration,
-   such as
+   In <literal>nixpkgs</literal>, urxvt is provided by the package <literal>rxvt-unicode</literal>. It can be configured to include your choice of plugins, reducing its closure size from the default configuration which includes all available plugins. To make use of this functionality, use an overlay or directly install an expression that overrides its configuration, such as
 <programlisting>
 rxvt-unicode.override {
   configure = { availablePlugins, ... }: {
@@ -25,14 +19,11 @@ rxvt-unicode.override {
   };
 }
 </programlisting>
-   If the <literal>configure</literal> function returns an attrset without the
-   <literal>plugins</literal> attribute, <literal>availablePlugins</literal>
-   will be used automatically.
+   If the <literal>configure</literal> function returns an attrset without the <literal>plugins</literal> attribute, <literal>availablePlugins</literal> will be used automatically.
   </para>
 
   <para>
-   In order to add plugins but also keep all default plugins installed, it is
-   possible to use the following method:
+   In order to add plugins but also keep all default plugins installed, it is possible to use the following method:
 <programlisting>
 rxvt-unicode.override {
   configure = { availablePlugins, ... }: {
@@ -49,17 +40,11 @@ rxvt-unicode.override {
 :l &lt;nixpkgs&gt;
 map (p: p.name) pkgs.rxvt-unicode.plugins
 </screen>
-   Alternatively, if your shell is bash or zsh and have completion enabled,
-   simply type <literal>nixpkgs.rxvt-unicode.plugins.&lt;tab&gt;</literal>.
+   Alternatively, if your shell is bash or zsh and have completion enabled, simply type <literal>nixpkgs.rxvt-unicode.plugins.&lt;tab&gt;</literal>.
   </para>
 
   <para>
-    In addition to <literal>plugins</literal> the options
-    <literal>extraDeps</literal> and <literal>perlDeps</literal> can be used
-    to install extra packages.
-    <literal>extraDeps</literal> can be used, for example, to provide
-    <literal>xsel</literal> (a clipboard manager) to the clipboard plugin,
-    without installing it globally:
+   In addition to <literal>plugins</literal> the options <literal>extraDeps</literal> and <literal>perlDeps</literal> can be used to install extra packages. <literal>extraDeps</literal> can be used, for example, to provide <literal>xsel</literal> (a clipboard manager) to the clipboard plugin, without installing it globally:
 <programlisting>
 rxvt-unicode.override {
   configure = { availablePlugins, ... }: {
@@ -67,10 +52,7 @@ rxvt-unicode.override {
   };
 }
 </programlisting>
-
-    <literal>perlDeps</literal> is a handy way to provide Perl packages to
-    your custom plugins (in <literal>$HOME/.urxvt/ext</literal>). For example,
-    if you need <literal>AnyEvent</literal> you can do:
+   <literal>perlDeps</literal> is a handy way to provide Perl packages to your custom plugins (in <literal>$HOME/.urxvt/ext</literal>). For example, if you need <literal>AnyEvent</literal> you can do:
 <programlisting>
 rxvt-unicode.override {
   configure = { availablePlugins, ... }: {
@@ -79,37 +61,25 @@ rxvt-unicode.override {
 }
 </programlisting>
   </para>
-
  </section>
 
  <section xml:id="sec-urxvt-pkg">
-
   <title>Packaging urxvt plugins</title>
 
   <para>
-   Urxvt plugins resides in
-   <literal>pkgs/applications/misc/rxvt-unicode-plugins</literal>.
-   To add a new plugin create an expression in a subdirectory and add the
-   package to the set in
-   <literal>pkgs/applications/misc/rxvt-unicode-plugins/default.nix</literal>.
+   Urxvt plugins resides in <literal>pkgs/applications/misc/rxvt-unicode-plugins</literal>. To add a new plugin create an expression in a subdirectory and add the package to the set in <literal>pkgs/applications/misc/rxvt-unicode-plugins/default.nix</literal>.
   </para>
 
   <para>
-   A plugin can be any kind of derivation, the only requirement is that it
-   should always install perl scripts in <literal>$out/lib/urxvt/perl</literal>.
-   Look for existing plugins for examples.
+   A plugin can be any kind of derivation, the only requirement is that it should always install perl scripts in <literal>$out/lib/urxvt/perl</literal>. Look for existing plugins for examples.
   </para>
 
   <para>
-   If the plugin is itself a perl package that needs to be imported from
-   other plugins or scripts, add the following passthrough:
+   If the plugin is itself a perl package that needs to be imported from other plugins or scripts, add the following passthrough:
 <programlisting>
 passthru.perlPackages = [ "self" ];
 </programlisting>
-   This will make the urxvt wrapper pick up the dependency and set up the perl
-   path accordingly.
+   This will make the urxvt wrapper pick up the dependency and set up the perl path accordingly.
   </para>
-
  </section>
-
 </section>

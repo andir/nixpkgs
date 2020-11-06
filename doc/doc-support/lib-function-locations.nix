@@ -1,4 +1,4 @@
-{ pkgs ? (import ./.. { }), nixpkgs ? { }}:
+{ pkgs ? (import ./.. { }), nixpkgs ? { }, prefix ? "lib", attrPath ? ["lib"] }:
 let
   revision = pkgs.lib.trivial.revisionWithDefault (nixpkgs.revision or "master");
 
@@ -20,12 +20,12 @@ let
         (name: builtins.isAttrs toplib.${name})
         (builtins.attrNames toplib));
 
-  nixpkgsLib = pkgs.lib;
+  nixpkgsLib = pkgs.lib.getAttrFromPath attrPath pkgs;
 
   flattenedLibSubset = { subsetname, functions }:
   builtins.map
     (fn: {
-      name = "lib.${subsetname}.${fn.name}";
+      name = "${prefix}.${subsetname}.${fn.name}";
       value = fn.location;
     })
     functions;
@@ -43,7 +43,7 @@ let
   liblocations =
     builtins.filter
       (elem: elem.value != null)
-      (nixpkgsLib.lists.flatten
+      (pkgs.lib.lists.flatten
         (locatedlibsets nixpkgsLib));
 
   fnLocationRelative = { name, value }:
@@ -58,7 +58,7 @@ let
     [ "-prime" ];
 
   urlPrefix = "https://github.com/NixOS/nixpkgs/blob/${revision}";
-  xmlstrings = (nixpkgsLib.strings.concatMapStrings
+  xmlstrings = (pkgs.lib.strings.concatMapStrings
       ({ name, value }:
       ''
       <section><title>${name}</title>

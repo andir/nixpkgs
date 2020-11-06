@@ -335,14 +335,15 @@ pkgs.dockerTools.buildLayeredImage {
   </para>
 
   <para>
-    The image produced by running the output script can be piped directly into <command>docker load</command>, to load it into the local docker daemon:
-    <screen><![CDATA[
+   The image produced by running the output script can be piped directly into <command>docker load</command>, to load it into the local docker daemon:
+<screen><![CDATA[
 $(nix-build) | docker load
     ]]></screen>
   </para>
+
   <para>
-    Alternatively, the image be piped via <command>gzip</command> into <command>skopeo</command>, e.g. to copy it into a registry:
-    <screen><![CDATA[
+   Alternatively, the image be piped via <command>gzip</command> into <command>skopeo</command>, e.g. to copy it into a registry:
+<screen><![CDATA[
 $(nix-build) | gzip --fast | skopeo copy docker-archive:/dev/stdin docker://some_docker_registry/myimage:tag
     ]]></screen>
   </para>

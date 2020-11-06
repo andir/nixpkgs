@@ -16,8 +16,6 @@ buildPythonApplication rec {
   pname = "kupfer";
   version = "319";
 
-  format = "other";
-
   src = fetchurl {
     url = "https://github.com/kupferlauncher/kupfer/releases/download/v${version}/kupfer-v${version}.tar.xz";
     sha256 = "0c9xjx13r8ckfr4az116bhxsd3pk78v04c3lz6lqhraak0rp4d92";
@@ -35,9 +33,13 @@ buildPythonApplication rec {
   # see https://github.com/NixOS/nixpkgs/issues/56943 for details
   strictDeps = false;
 
-  postInstall = ''
+  postInstall = let
+    pythonPath = (stdenv.lib.concatMapStringsSep ":"
+      (m: "${m}/lib/${python.libPrefix}/site-packages")
+      propagatedBuildInputs);
+  in ''
     gappsWrapperArgs+=(
-      "--prefix" "PYTHONPATH" : "${makePythonPath propagatedBuildInputs}"
+      "--prefix" "PYTHONPATH" : "${pythonPath}"
       "--set" "PYTHONNOUSERSITE" "1"
     )
   '';

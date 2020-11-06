@@ -321,8 +321,6 @@ in
 
   fetchMavenArtifact = callPackage ../build-support/fetchmavenartifact { };
 
-  find-cursor = callPackage ../tools/X11/find-cursor { };
-
   prefer-remote-fetch = import ../build-support/prefer-remote-fetch;
 
   global-platform-pro = callPackage ../development/tools/global-platform-pro/default.nix { };
@@ -2470,8 +2468,6 @@ in
   phoronix-test-suite = callPackage ../tools/misc/phoronix-test-suite { };
 
   photon = callPackage ../tools/networking/photon { };
-
-  piglit = callPackage ../tools/graphics/piglit { };
 
   playerctl = callPackage ../tools/audio/playerctl { };
 
@@ -5489,7 +5485,6 @@ in
   mailnagWithPlugins = mailnag.withPlugins(
     builtins.attrValues mailnag.availablePlugins
   );
-  bubblemail = callPackage ../applications/networking/mailreaders/bubblemail { };
 
   mailsend = callPackage ../tools/networking/mailsend { };
 
@@ -9933,12 +9928,10 @@ in
   sbcl_2_0_9 = callPackage ../development/compilers/sbcl/2.0.9.nix {};
   sbcl = callPackage ../development/compilers/sbcl {};
 
-  inherit (callPackage ../development/compilers/scala/2.x.nix { jre = jre8; })
-    scala_2_10
-    scala_2_11
-    scala_2_12
-    scala_2_13;
-
+  scala_2_10 = callPackage ../development/compilers/scala/2.10.nix { };
+  scala_2_11 = callPackage ../development/compilers/scala/2.11.nix { };
+  scala_2_12 = callPackage ../development/compilers/scala/2.12.nix { jre = jre8; };
+  scala_2_13 = callPackage ../development/compilers/scala/2.13.nix { jre = jre8; };
   scala = scala_2_13;
 
   metal = callPackage ../development/libraries/metal { };
@@ -9965,8 +9958,6 @@ in
   solc = callPackage ../development/compilers/solc { };
 
   souffle = callPackage ../development/compilers/souffle { };
-
-  spasm-ng = callPackage ../development/compilers/spasm-ng { };
 
   spirv-llvm-translator = callPackage ../development/compilers/spirv-llvm-translator { };
 
@@ -16074,8 +16065,6 @@ in
     stdenv = gcc6Stdenv; # upstream code incompatible with gcc7
   };
 
-  waffle = callPackage ../development/libraries/waffle { };
-
   wally-cli = callPackage ../development/tools/wally-cli { };
 
   wavpack = callPackage ../development/libraries/wavpack { };
@@ -19736,8 +19725,6 @@ in
   ttf_bitstream_vera = callPackage ../data/fonts/ttf-bitstream-vera { };
 
   ttf-envy-code-r = callPackage ../data/fonts/ttf-envy-code-r {};
-
-  ttf-tw-moe = callPackage ../data/fonts/ttf-tw-moe { };
 
   twemoji-color-font = callPackage ../data/fonts/twemoji-color-font {
     inherit (nodePackages) svgo;

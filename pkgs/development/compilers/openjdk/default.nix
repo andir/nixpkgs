@@ -31,10 +31,6 @@ let
       gtk3 gnome_vfs GConf glib
     ];
 
-    passthru = {
-      inherit gtk3;
-    };
-
     patches = [
       ./fix-java-home-jdk10.patch
       ./read-truststore-from-env-jdk10.patch

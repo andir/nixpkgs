@@ -45,7 +45,9 @@
   <title>How to play</title>
 
   <para>
-   Use <programlisting>programs.steam.enable = true;</programlisting> if you want to add steam to systemPackages and also enable a few workarrounds aswell as Steam controller support or other Steam supported controllers such as the DualShock 4 or Nintendo Switch Pr.
+   Use
+<programlisting>programs.steam.enable = true;</programlisting>
+   if you want to add steam to systemPackages and also enable a few workarrounds aswell as Steam controller support or other Steam supported controllers such as the DualShock 4 or Nintendo Switch Pr.
   </para>
  </section>
 

@@ -25,6 +25,13 @@
   <title>Builders</title>
   <xi:include href="builders/fetchers.xml" />
   <xi:include href="builders/trivial-builders.xml" />
+  <chapter xmlns="http://docbook.org/ns/docbook"
+           xmlns:xlink="http://www.w3.org/1999/xlink"
+           xmlns:xi="http://www.w3.org/2001/XInclude"
+           xml:id="chap-functions">
+   <title>Trivial Builders reference</title>
+    <xi:include href="builders/trivial-builders-generated/trivial-builders.xml" />
+  </chapter>
   <xi:include href="builders/special.xml" />
   <xi:include href="builders/images.xml" />
   <xi:include href="languages-frameworks/index.xml" />

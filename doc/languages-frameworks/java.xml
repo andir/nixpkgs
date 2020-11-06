@@ -43,7 +43,7 @@ installPhase =
       --add-flags "-cp $out/share/java/foo.jar org.foo.Main"
   '';
 </programlisting>
-Since the introduction of the Java Platform Module System in Java 9, Java distributions typically no longer ship with a general-purpose JRE: instead, they allow generating a JRE with only the modules required for your application(s). Because we can't predict what modules will be needed on a general-purpose system, the default <package>jre</package> package is the full JDK. When building a minimal system/image, you can override the <literal>modules</literal> parameter on <literal>jre_minimal</literal> to build a JRE with only the modules relevant for you:
+  Since the introduction of the Java Platform Module System in Java 9, Java distributions typically no longer ship with a general-purpose JRE: instead, they allow generating a JRE with only the modules required for your application(s). Because we can't predict what modules will be needed on a general-purpose system, the default <package>jre</package> package is the full JDK. When building a minimal system/image, you can override the <literal>modules</literal> parameter on <literal>jre_minimal</literal> to build a JRE with only the modules relevant for you:
 <programlisting>
 let
   my_jre = pkgs.jre_minimal.override {
