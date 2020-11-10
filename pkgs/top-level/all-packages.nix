@@ -18915,6 +18915,7 @@ in
     ubootSopine
     ubootUtilite
     ubootWandboard
+    ubootRockPi4
     ;
 
   uclibc = callPackage ../os-specific/linux/uclibc { };
