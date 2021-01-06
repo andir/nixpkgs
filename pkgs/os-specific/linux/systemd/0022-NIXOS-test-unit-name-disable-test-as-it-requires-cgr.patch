@@ -1,0 +1,45 @@
+From 6586d7dd4e87fded73e38b554f6dab11f0b1df60 Mon Sep 17 00:00:00 2001
+From: Andreas Rammhold <andreas@rammhold.de>
+Date: Wed, 6 Jan 2021 00:30:07 +0100
+Subject: [PATCH] NIXOS: test-unit-name: disable test as it requires cgroups
+
+Test fails after realizing that it can't create a scope while trying to
+enter a cgroup:
+
+> 334/550 test-unit-name                            FAIL           0.15s (killed by signal 6 SIGABRT)
+>
+> --- command ---
+> 23:28:19 PATH='/build/source/build:/nix/store/mr0azqypvrakd13xa4k61wck70g73m9i-pkg-config-wrapper-0.29.2/bin:/nix/store/cbwbpkdnyhl1algka9i1y7nfnhjl6n91-gperf-3.1/bin:/nix/store/0lpc1g85ia2gfbd6g5icjk0kjp8fdksz-ninja-1.10.2/bin:/nix/store/jxyy9v8h8nvcxqsnxc2qh48icjgm45ch-meson-0.56.0/bin:/nix/store/zrr3r83jjfp2km0gl58ki2dip2bxx8b9-coreutils-8.32/bin:/nix/store/jzcr58b7dbh2hbg7gjdpph1dv8xh94ar-patchelf-0.12/bin:/nix/store/a5zdsgv0nnsjl6m5i8w61gh6yfiwr463-getent-1003.1-2008/bin:/nix/store/3a4gfx57ni4b6inrbbizspp6nc18h7n1-gnum4-1.4.18/bin:/nix/store/p47gwbylxdkiqwr3crq6732dw2gyim5c-intltool-0.51.0/bin:/nix/store/8yly10a97h47kql79pjmgrb4sr8nf0s7-gettext-0.21/bin:/nix/store/q510bc2bcgyix52sa089bn6i2kfknabb-perl-5.32.0/bin:/nix/store/r859f71fc15hihm8xiqlyzsgwf2kqnaq-perl5.32.0-libwww-perl-6.49/bin:/nix/store/0q6xn7ijvms9c6zk9xvghh6ialmfi11z-libxslt-1.1.34-dev/bin:/nix/store/sn6i61iw92cxp40dk647inzz5w7zfmkb-libxslt-1.1.34-bin/bin:/nix/store/frzgqjzwsg1lr4f6cfp4mbch77a7fnq3-python3-3.8.6-env/bin:/nix/store/1y1xz46jcd47f43j5gkkh87bavq6a16x-gcc-wrapper-10.2.0/bin:/nix/store/0w8afr2ls6xcf799jdicj0xns16n0bi8-gcc-10.2.0/bin:/nix/store/z3jhvchgps8h4860gglpfk0cqq8a4qa6-glibc-2.32-24-bin/bin:/nix/store/zrr3r83jjfp2km0gl58ki2dip2bxx8b9-coreutils-8.32/bin:/nix/store/5jacgggpba59x3qcfzbaaz7qza3dmlhi-binutils-wrapper-2.34/bin:/nix/store/4h1ph75rj8ksrqp5m3afh000sqnikj8j-binutils-2.34/bin:/nix/store/z3jhvchgps8h4860gglpfk0cqq8a4qa6-glibc-2.32-24-bin/bin:/nix/store/zrr3r83jjfp2km0gl58ki2dip2bxx8b9-coreutils-8.32/bin:/nix/store/6cg7vdng697z8sljhjfq65wfk2zpf8ya-acl-2.2.53-bin/bin:/nix/store/l8mrbx973d9fj7hg8y5yk4k2aphqcjmz-audit-2.8.5-bin/bin:/nix/store/cl3k83wavsh71z3cbyd66dmjxx9x5gi5-kmod-27/bin:/nix/store/5rk7yfp5fwwsj8y2042gbnygby67cxaz-attr-2.4.48-bin/bin:/nix/store/67z8vlr9cphr9b23i0gia86g6aw8csdf-libcap-2.44/bin:/nix/store/r0agmjwyl1ckxpl93k62fpwqjhhnphys-libidn2-2.3.0-bin/bin:/nix/store/ccfvvg8b6gakw0f1cf6615mrkv69gvdn-util-linux-2.36.1-bin/bin:/nix/store/8c25bryvymvlwfak7379q431nbz7h9rb-linux-pam-1.5.1/bin:/nix/store/7m9baq68a8ijcfiyngd77w7aalj21k6y-kexec-tools-2.0.20/bin:/nix/store/6v6i3kza4a033rrpxkcl4079al15kbxb-libseccomp-2.5.1/bin:/nix/store/zrr3r83jjfp2km0gl58ki2dip2bxx8b9-coreutils-8.32/bin:/nix/store/47s2bwkyn2jfxjvjrc6xnhv2fxy0kdn7-findutils-4.7.0/bin:/nix/store/pn51im7i3z2kbx2zsqpl0qrf81646375-diffutils-3.7/bin:/nix/store/x86mwz55ncb8zcjkq0arq6ilc9spd8dj-gnused-4.8/bin:/nix/store/2639gi2w2cjyv9whll0d4zm3w2vhwh1s-gnugrep-3.6/bin:/nix/store/fnsp0w01w4qqmj034xkflf1s3h8dwa8y-gawk-5.1.0/bin:/nix/store/h59wzwpss16zxw85vvs0ny68ra56klk0-gnutar-1.32/bin:/nix/store/m27vhrklr7qg5s8x2fz6zmgmkxgai6fq-gzip-1.10/bin:/nix/store/xy7d77k2wwkbspi7xffbyrz3zb5w1qji-bzip2-1.0.6.0.1-bin/bin:/nix/store/1wj0918bcmnnlwz2ggv8x5yfy139zg3s-gnumake-4.3/bin:/nix/store/frvc6zbb9hnismvzi6xkdybns2y42sqd-bash-4.4-p23/bin:/nix/store/0mbwrysrl9805g1np1c9rzg9llhw7ka1-patch-2.7.6/bin:/nix/store/x78d1pyxs9a4z6shap4al0cywii68pxb-xz-5.2.5-bin/bin' SYSTEMD_KBD_MODEL_MAP='/build/source/src/locale/kbd-model-map' SYSTEMD_LANGUAGE_FALLBACK_MAP='/build/source/src/locale/language-fallback-map' /build/source/build/test-unit-name
+> --- stderr ---
+> Failed to connect to system bus: No such file or directory
+> Couldn't allocate a scope unit for this test, proceeding without.
+> Assertion 'r >= 0' failed at src/shared/tests.c:269, function enter_cgroup(). Aborting.
+> -------
+---
+ src/test/meson.build | 10 ----------
+ 1 file changed, 10 deletions(-)
+
+diff --git a/src/test/meson.build b/src/test/meson.build
+index 7ff9edfed1..13a33f565a 100644
+--- a/src/test/meson.build
++++ b/src/test/meson.build
+@@ -128,16 +128,6 @@ tests += [
+          [],
+          []],
+ 
+-        [['src/test/test-unit-name.c'],
+-         [libcore,
+-          libshared],
+-         [threads,
+-          librt,
+-          libseccomp,
+-          libselinux,
+-          libmount,
+-          libblkid]],
+-
+         [['src/test/test-load-fragment.c'],
+          [libcore,
+           libshared],
+-- 
+2.29.2
+

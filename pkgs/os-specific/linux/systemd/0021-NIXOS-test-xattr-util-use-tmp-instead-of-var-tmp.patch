@@ -1,0 +1,25 @@
+From 7c9de8a5e1769934d478a6306a178e44c82e8f13 Mon Sep 17 00:00:00 2001
+From: Andreas Rammhold <andreas@rammhold.de>
+Date: Wed, 6 Jan 2021 00:17:00 +0100
+Subject: [PATCH] NIXOS: test-xattr-util: use /tmp instead of /var/tmp
+
+---
+ src/test/test-xattr-util.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/test/test-xattr-util.c b/src/test/test-xattr-util.c
+index f93aca68f0..59074c4bc9 100644
+--- a/src/test/test-xattr-util.c
++++ b/src/test/test-xattr-util.c
+@@ -16,7 +16,7 @@
+ #include "xattr-util.h"
+ 
+ static void test_fgetxattrat_fake(void) {
+-        char t[] = "/var/tmp/xattrtestXXXXXX";
++        char t[] = "/tmp/xattrtestXXXXXX";
+         _cleanup_close_ int fd = -1;
+         const char *x;
+         char v[3];
+-- 
+2.29.2
+

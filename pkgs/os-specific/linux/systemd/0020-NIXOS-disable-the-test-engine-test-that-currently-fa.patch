@@ -1,0 +1,51 @@
+From 3a59904b9cdd2ad2ee11babd491b2f04f872e8cd Mon Sep 17 00:00:00 2001
+From: Andreas Rammhold <andreas@rammhold.de>
+Date: Wed, 6 Jan 2021 00:04:28 +0100
+Subject: [PATCH] NIXOS: disable the test-engine test that currently fails
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The test currently fails while trying to access the unified cgroup
+hiarchie and we do not have /sys/ in the nix build sandbox (yet):
+> --- command ---
+> 22:50:00 SYSTEMD_LANGUAGE_FALLBACK_MAP='/build/source/src/locale/language-fallback-map' SYSTEMD_KBD_MODEL_MAP='/build/source/src/locale/kbd-model-map' PATH='/build/source/build:/nix/store/27ndc59jh02kgrwah5vxd0n1d3j408gn-pkg-config-wrapper-0.29.2/bin:/nix/store/9aip1x5fj04wv3ixmgqyc3li6n0arryg-gperf-3.1/bin:/nix/store/psdzc0c11i4jwdshshh8a0d1ll26ld22-ninja-1.10.2/bin:/nix/store/h22iddbb8xcdyq5w5vkdxcis94qyj15s-meson-0.56.0/bin:/nix/store/0rrv6ycny1mf7hwqk67717z9bn08vc9w-coreutils-8.32/bin:/nix/store/a3qybasafjd7fxbmjpfaak20mw47blna-patchelf-0.12/bin:/nix/store/3dm5yvzwj9rj4cv4zpppxb8h87swqx74-getent-1003.1-2008/bin:/nix/store/6kba1yycj36z8mp2sxnv9m2xc4w9gyrh-gnum4-1.4.18/bin:/nix/store/165zr3if8iyvgrqqhp5mcm0akb843x3y-intltool-0.51.0/bin:/nix/store/bs9jrv7ya0qqrxyymg3jcm483zqsabp1-gettext-0.21/bin:/nix/store/zrbp93gp6qmxrfp2ywn82m80isw9pmw5-perl-5.32.0/bin:/nix/store/07vsil0j6x0gxywb00i2qnr9vjrxkw5q-perl5.32.0-libwww-perl-6.47/bin:/nix/store/c9ig01671wn0dq0f9nbaflz28711v48m-libxslt-1.1.34-dev/bin:/nix/store/g9p9av399ida9a717ph52w5da1p3jzc9-libxslt-1.1.34-bin/bin:/nix/store/cxxxd9sknzc7k9gadqf2djj84ac6cfpa-python3-3.8.6-env/bin:/nix/store/y78inja64xaaq6bx33nxn2h1lgw0jswk-gcc-wrapper-10.2.0/bin:/nix/store/kg2s3k77ifsyd59ac08mjmmjjmsvgsvg-gcc-10.2.0/bin:/nix/store/z1hzjnfchid5fa10w1ghz3l863c6wx1d-glibc-2.32-10-bin/bin:/nix/store/0rrv6ycny1mf7hwqk67717z9bn08vc9w-coreutils-8.32/bin:/nix/store/2xrj4wg0sn53lbvi6qgkv3vyyzf8c39a-binutils-wrapper-2.34/bin:/nix/store/4l1qrgxfy171bngpphp4p9wj7bhrlfn3-binutils-2.34/bin:/nix/store/z1hzjnfchid5fa10w1ghz3l863c6wx1d-glibc-2.32-10-bin/bin:/nix/store/0rrv6ycny1mf7hwqk67717z9bn08vc9w-coreutils-8.32/bin:/nix/store/x8frjrq221fhfrl97gd6x32zb72dzp3l-acl-2.2.53-bin/bin:/nix/store/2iz40x7432q2vbls6mwm9lvrmvkam5wq-audit-2.8.5-bin/bin:/nix/store/8vx5r0qa4d5vfin9nd1i9dclzkqrysm9-kmod-27/bin:/nix/store/2i7ghz9d00x12qv7slxcqzxx166nmmy3-attr-2.4.48-bin/bin:/nix/store/qnb5gjxqr4nyfdqhsdyy4mbf3z2da6sb-libcap-2.44/bin:/nix/store/d5wsryj80q4j4b64ci4lyxijshw19s9b-libidn2-2.3.0-bin/bin:/nix/store/3g2pa163kq7rrw1x4mc0fmchqd1ap13k-util-linux-2.36.1-bin/bin:/nix/store/qm6aayy2y92qw68f0bhv4yxb3kdlgi1c-linux-pam-1.5.1/bin:/nix/store/a5divl36xcgry812cfsvqi3md1ryzrbx-kexec-tools-2.0.20/bin:/nix/store/m23ajkjnwvyy0isgld6qzmqs6j9y831s-libseccomp-2.5.1/bin:/nix/store/0rrv6ycny1mf7hwqk67717z9bn08vc9w-coreutils-8.32/bin:/nix/store/3gw04pbnnbz17p45jc144wyrr17m477r-findutils-4.7.0/bin:/nix/store/kxnk0jpw1f69wkpavzl5py4lqz8si3q0-diffutils-3.7/bin:/nix/store/56l3lzjaw1ynh4m5937djgi29kq9p1bd-gnused-4.8/bin:/nix/store/28ydlbwk132phwhwpj9bbb3n964f1wsl-gnugrep-3.6/bin:/nix/store/mf4dx98mrhpilq1xclfb2w0cvy15if5l-gawk-5.1.0/bin:/nix/store/y93c8czwi97wdv4c6da21a17j7171c50-gnutar-1.32/bin:/nix/store/i21h8ds7y1q3p10hrhskagycqbi8k3f8-gzip-1.10/bin:/nix/store/sc4zcl72207ngf7pbxsb37y15g8gp12v-bzip2-1.0.6.0.1-bin/bin:/nix/store/zh9gdj8c7pkjrky2bqm72cdvihwf9gz8-gnumake-4.3/bin:/nix/store/zcl19h06322c3kss6bvf05w2pxg4kfll-bash-4.4-p23/bin:/nix/store/xpdjb0p55mv0i7a3ym29mm9an1i7vy4r-patch-2.7.6/bin:/nix/store/jx8if71ncsh33cggb3yxbhgb1d6711h0-xz-5.2.5-bin/bin' /build/source/build/test-engine
+> --- stderr ---
+> Found container virtualization none.
+> Bus n/a: changing state UNSET → OPENING
+> sd-bus: starting bus by connecting to /run/dbus/system_bus_socket...
+> Bus n/a: changing state OPENING → CLOSED
+> Failed to connect to system bus: No such file or directory
+> Couldn't allocate a scope unit for this test, proceeding without.
+> statfs("/sys/fs/cgroup/") failed: No such file or directory
+> Assertion 'r >= 0' failed at src/shared/tests.c:269, function enter_cgroup(). Aborting.
+> -------
+---
+ src/test/meson.build | 11 -----------
+ 1 file changed, 11 deletions(-)
+
+diff --git a/src/test/meson.build b/src/test/meson.build
+index 6234294947..7ff9edfed1 100644
+--- a/src/test/meson.build
++++ b/src/test/meson.build
+@@ -50,17 +50,6 @@ tests += [
+          [],
+          []],
+ 
+-        [['src/test/test-engine.c'],
+-         [libcore,
+-          libudev,
+-          libshared],
+-         [threads,
+-          librt,
+-          libseccomp,
+-          libselinux,
+-          libmount,
+-          libblkid]],
+-
+         [['src/test/test-emergency-action.c'],
+          [libcore,
+           libshared],
+-- 
+2.29.2
+

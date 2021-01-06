@@ -149,6 +149,9 @@ stdenv.mkDerivation {
     ./0017-path-util.h-add-placeholder-for-DEFAULT_PATH_NORMAL.patch
     ./0018-logind-seat-debus-show-CanMultiSession-again.patch
     ./0019-Revert-pkg-config-prefix-is-not-really-configurable-.patch
+    ./0020-NIXOS-disable-the-test-engine-test-that-currently-fa.patch
+    ./0021-NIXOS-test-xattr-util-use-tmp-instead-of-var-tmp.patch
+    ./0022-NIXOS-test-unit-name-disable-test-as-it-requires-cgr.patch
   ];
 
   postPatch = ''
@@ -315,7 +318,7 @@ stdenv.mkDerivation {
     "-Ddebug-shell=${bashInteractive}/bin/bash"
     "-Dglib=${lib.boolToString (glib != null)}"
     # while we do not run tests we should also not build them. Removes about 600 targets
-    "-Dtests=false"
+    #"-Dtests=false"
     "-Danalyze=${lib.boolToString withAnalyze}"
     "-Dgcrypt=${lib.boolToString (libgcrypt != null)}"
     "-Dimportd=${lib.boolToString withImportd}"
@@ -468,7 +471,15 @@ stdenv.mkDerivation {
     "-DSYSTEMD_BINARY_PATH=\"/run/current-system/systemd/lib/systemd/systemd\""
   ];
 
-  doCheck = false; # fails a bunch of tests
+  doCheck = true; # fails a bunch of tests
+  preCheck = ''
+    # tmpfiles tests fail when checking for safe "transitions". That is never the case in the
+    # Nix sanbox as / is owned by nobody:nixbld and systemd-tmpfiles only treats transitions from
+    # uid 0 to something else as safe.
+    # The following line removes only the systemd tmpfiles tests that would create files. We are leaving
+    # all the negative tests (invalid rules) untouched.
+    sed -e '/test_valid_specifiers(user=/d' -i /build/source/src/test/test-systemd-tmpfiles.py
+  '';
 
   # trigger the test -n "$DESTDIR" || mutate in upstreams build system
   preInstall = ''
