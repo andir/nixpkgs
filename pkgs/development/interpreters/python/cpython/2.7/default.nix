@@ -12,7 +12,7 @@
 , zlib
 , self
 , configd, coreutils
-, autoreconfHook
+, autoreconfHook271
 , python-setup-hook
 # Some proprietary libs assume UCS2 unicode, especially on darwin :(
 , ucsEncoding ? 4
@@ -205,7 +205,7 @@ let
     ++ optionals x11Support [ tcl tk xlibsWrapper libX11 ]
     ++ optional (stdenv.isDarwin && configd != null) configd;
   nativeBuildInputs =
-    [ autoreconfHook ]
+    [ autoreconfHook271 ]
     ++ optionals (stdenv.hostPlatform != stdenv.buildPlatform)
       [ buildPackages.stdenv.cc buildPackages.python ];
 
