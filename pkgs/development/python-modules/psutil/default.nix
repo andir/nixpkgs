@@ -17,7 +17,9 @@ buildPythonPackage rec {
 
   # arch doesn't report frequency is the same way
   # tests segfaults on darwin https://github.com/giampaolo/psutil/issues/1715
-  doCheck = !stdenv.isDarwin && stdenv.isx86_64;
+  # tests don't work on systems where /proc/mounts doesn't expose any partition (e.g. tight build sandboxes)
+  # tests fail on systems with minimal amount of swap
+  doCheck = false;
   checkInputs = [ pytest ]
     ++ lib.optionals isPy27 [ mock ipaddress unittest2 ];
   # out must be referenced as test import paths are relative
