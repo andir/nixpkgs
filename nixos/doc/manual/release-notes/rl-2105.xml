@@ -74,6 +74,11 @@
      further details.
     </para>
    </listitem>
+   <listitem>
+    <para>
+     Plasma desktop environment now has support for the wayland session, finally 😺!
+    </para>
+   </listitem>
   </itemizedlist>
  </section>
 
