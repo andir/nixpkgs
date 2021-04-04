@@ -82,6 +82,10 @@ rec {
     config = "mipsel-unknown-linux-uclibc";
   } // platforms.ben_nanonote;
 
+  unifi-appro = {
+    config = "mipsel-unknown-linux-musl";
+  } // platforms.unifi-appro;
+
   fuloongminipc = {
     config = "mipsel-unknown-linux-gnu";
   } // platforms.fuloong2f_n32;

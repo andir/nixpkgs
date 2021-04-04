@@ -34,6 +34,7 @@ rec {
     armv7-a        = [ ];
     armv8-a        = [ ];
     mips32         = [ ];
+    mips32r2       = [ ];
     loongson2f     = [ ];
   };
 
@@ -86,6 +87,7 @@ rec {
     armv7-a        = [ ];
     armv8-a        = [ ];
     mips32         = [ ];
+    mips32r2       = [ ];
     loongson2f     = [ ];
   };
 
