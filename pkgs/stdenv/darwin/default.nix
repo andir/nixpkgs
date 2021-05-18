@@ -5,15 +5,15 @@
   if localSystem.isAarch64 then
     let
       fetch = { file, sha256, executable ? true }: import <nix/fetchurl.nix> {
-        url = null; # to be built by hydra and injected here
+        url = "https://s.rammhold.de/aarch64-cross-bootstrap/${file}"; # to be built by hydra and injected here
         inherit (localSystem) system;
         inherit sha256 executable;
       }; in {
-        sh      = fetch { file = "sh";    sha256 = "0000000000000000000000000000000000000000000000000000"; };
-        bzip2   = fetch { file = "bzip2"; sha256 = "0000000000000000000000000000000000000000000000000000"; };
-        mkdir   = fetch { file = "mkdir"; sha256 = "0000000000000000000000000000000000000000000000000000"; };
-        cpio    = fetch { file = "cpio";  sha256 = "0000000000000000000000000000000000000000000000000000"; };
-        tarball = fetch { file = "bootstrap-tools.cpio.bz2"; sha256 = "0000000000000000000000000000000000000000000000000000"; executable = false; };
+        sh      = fetch { file = "sh";    sha256 = "sha256-0l59et2fUSWNEnqv3JpvJIFDFnzj/3zqHjIlumjuo54="; };
+        bzip2   = fetch { file = "bzip2"; sha256 = "sha256-GBDRLbDrcebbKi7NF3FgF2U0kKqB0U0hveY4OotGGs4="; };
+        mkdir   = fetch { file = "mkdir"; sha256 = "sha256-Cr0HzwnrrdbKpCfjm8bPKjBkvBLb10H2SPQrdUGaNtU="; };
+        cpio    = fetch { file = "cpio";  sha256 = "sha256-CXhU92tgj9xzyk2LYOj8jiUGRRoueYfGaX5L6YPB/Z4="; };
+        tarball = fetch { file = "bootstrap-tools.cpio.bz2"; sha256 = "sha256-vtEo/jLHzbVAq1Szt+YVrFrbcyJHLlJzNXWqMaYYQ+w="; executable = false; };
       }
   else
     let
