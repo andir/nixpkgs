@@ -35,7 +35,7 @@ let
         sha256 = "06w147wzrzp6xbqiz6s5nq5xdjy7jn3f18xajxy50pynjd6vmfh5";
       };
 
-      outputs = [ "out" "man" ] ++ map (p: p.name) enabledPlugins;
+      outputs = [ "out" "man" "dev" ] ++ map (p: p.name) enabledPlugins;
 
       cmakeFlags = with lib; [
         "-DENABLE_MAN=ON"
