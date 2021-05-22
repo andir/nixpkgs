@@ -27010,6 +27010,8 @@ in
   weechat = wrapWeechat weechat-unwrapped { };
 
   weechatScripts = recurseIntoAttrs (callPackage ../applications/networking/irc/weechat/scripts { });
+  weechatPlugins = recurseIntoAttrs (callPackage ../applications/networking/irc/weechat/plugins { });
+
 
   westonLite = weston.override {
     pango = null;
