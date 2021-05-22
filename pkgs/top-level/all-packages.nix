@@ -27012,6 +27012,11 @@ in
   weechatScripts = recurseIntoAttrs (callPackage ../applications/networking/irc/weechat/scripts { });
   weechatPlugins = recurseIntoAttrs (callPackage ../applications/networking/irc/weechat/plugins { });
 
+  weechat-with-matrix-rs = weechat.override (_: {
+    configure = { availablePlugins, ... }: {
+      plugins = builtins.attrValues availablePlugins ++ [ ({ pluginFile = "${weechatPlugins.weechat-matrix-rs}/lib/libmatrix.so"; }) ];
+    };
+  });
 
   westonLite = weston.override {
     pango = null;
