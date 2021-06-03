@@ -11,6 +11,7 @@
 , qpdf
 , tesseract4
 , unpaper
+, liberation_ttf
 }:
 
 let
@@ -146,6 +147,26 @@ py.pkgs.pythonPackages.buildPythonApplication rec {
     whoosh
     zope_interface
   ];
+
+  doCheck = true;
+  checkInputs = with py.pkgs.pythonPackages; [
+    pytest
+    pytest-cov
+    pytest-django
+    pytest-env
+    pytest-sugar
+    pytest-xdist
+    factory_boy
+  ];
+
+  # Run the tests within a temporary HOME directory,
+  # with the runtime binaries on PATH and
+  # a set of fonts in XDG_DATA_DIRS that are expected to exist during the test run.
+  checkPhase = ''
+    pushd src
+    XDG_DATA_DIRS="${liberation_ttf}/share:$XDG_DATA_DIRS" PATH="${path}:$PATH" HOME=$(mktemp -d) pytest
+    popd
+  '';
 
   installPhase = ''
     mkdir -p $out/lib
