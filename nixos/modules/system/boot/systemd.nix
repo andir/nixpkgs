@@ -7,6 +7,8 @@ with import ./systemd-lib.nix { inherit config lib pkgs; };
 
 let
 
+  systemd-hardening-profiles = import ./systemd-hardening-profiles.nix { inherit lib; };
+
   cfg = config.systemd;
 
   systemd = cfg.package;
@@ -290,7 +292,10 @@ let
         (mkIf (config.postStop != "")
           { serviceConfig.ExecStopPost =
               makeJobScript "${name}-post-stop" config.postStop;
-          })
+        })
+        (mkIf (config.defaultHardening != null) {
+          serviceConfig = systemd-hardening-profiles.${config.defaultHardening} config;
+        })
       ];
   };
 

@@ -371,6 +371,18 @@ in rec {
       apply = v: if isList v then v else [ v ];
     };
 
+    defaultHardening = mkOption {
+      type = with types; nullOr (enum [ "v1" ]);
+      default = null;
+      example = "v1";
+      description = ''
+        Enable a default profile for service hardening.
+        According to the selected level a set of restrictive defaults
+        for the serviceConfig section of this service will be set. You
+        can still opt-out of these option by explicitly specifying them.
+      '';
+    };
+
   };
 
 
