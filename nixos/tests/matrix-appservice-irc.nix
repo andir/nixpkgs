@@ -25,7 +25,7 @@ import ./make-test-python.nix ({ pkgs, ... }:
                 "bind_address" = "";
                 "port" = 8448;
                 "resources" = [
-                  { "compress" = true; "names" = [ "client" "webclient" ]; }
+                  { "compress" = true; "names" = [ "client" ]; }
                   { "compress" = false; "names" = [ "federation" ]; }
                 ];
                 "tls" = false;
@@ -85,45 +85,65 @@ import ./make-test-python.nix ({ pkgs, ... }:
       client = { pkgs, ... }: {
         environment.systemPackages = [
           (pkgs.writers.writePython3Bin "do_test"
-            { libraries = [ pkgs.python3Packages.matrix-client ]; } ''
+            { libraries = [ pkgs.python3Packages.matrix-nio ]; } ''
             import socket
-            from matrix_client.client import MatrixClient
+            from nio import AsyncClient, RoomMessageText
             from time import sleep
-
-            matrix = MatrixClient("${homeserverUrl}")
-            matrix.register_with_password(username="alice", password="foobar")
-
-            irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            irc.connect(("ircd", 6667))
-            irc.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-            irc.send(b"USER bob bob bob :bob\n")
-            irc.send(b"NICK bob\n")
-
-            m_room = matrix.join_room("#irc_#test:homeserver")
-            irc.send(b"JOIN #test\n")
-
-            # plenty of time for the joins to happen
-            sleep(10)
-
-            m_room.send_text("hi from matrix")
-            irc.send(b"PRIVMSG #test :hi from irc \r\n")
-
-            print("Waiting for irc message...")
-            while True:
-                buf = irc.recv(10000)
-                if b"hi from matrix" in buf:
-                    break
-
-            print("Waiting for matrix message...")
+            import asyncio
 
 
-            def callback(room, e):
-                if "hi from irc" in e['content']['body']:
-                    exit(0)
+            async def run():
+                matrix = AsyncClient("${homeserverUrl}")
+                print("qwmr " + str(await matrix.register("alice", "foobar")))
 
+                irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                irc.connect(("ircd", 6667))
+                irc.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+                irc.send(b"USER bob bob bob :bob\n")
+                irc.send(b"NICK bob\n")
 
-            m_room.add_listener(callback, "m.room.message")
-            matrix.listen_forever()
+                tmp = await matrix.join("#irc_#test:homeserver")
+                print("jfsk " + str(tmp))
+                room_id = tmp.room_id
+                irc.send(b"JOIN #test\n")
+
+                # plenty of time for the joins to happen
+                sleep(10)
+
+                # Exchange messages
+                print("xpcv")
+                print("sdfk " + str(await matrix.room_send(
+                        room_id=room_id,
+                        message_type="m.room.message",
+                        content={
+                            "msgtype": "m.text",
+                            "body": "hi from matrix"
+                        }
+                    )))
+                irc.send(b"PRIVMSG #test :hi from irc \r\n")
+
+                print("Waiting for irc message...")
+                while True:
+                    buf = irc.recv(10000)
+                    if b"hi from matrix" in buf:
+                        print("emrd")
+                        break
+
+                print("Waiting for matrix message...")
+
+                async def callback(room, e):
+                    print("qmyg " + str(e))
+                    if "hi from irc" in e.body:
+                        print("qwfx")
+                        await matrix.close()
+                        exit(0)  # Actual exit point
+
+                matrix.add_event_callback(callback, RoomMessageText)
+                await matrix.sync_forever()
+                exit(1)  # Unreachable
+
+            print("qmty")
+            asyncio.run(run())
           ''
           )
         ];
@@ -158,7 +178,7 @@ import ./make-test-python.nix ({ pkgs, ... }:
           homeserver.wait_for_open_port(8448)
 
       with subtest("ensure messages can be exchanged"):
-          client.succeed("do_test")
+          client.log("tpyv")
+          client.succeed("do_test >&2")
     '';
-
   })
