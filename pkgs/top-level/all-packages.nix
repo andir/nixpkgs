@@ -1845,7 +1845,9 @@ with pkgs;
 
   go-audit = callPackage ../tools/system/go-audit { };
 
-  gopass = callPackage ../tools/security/gopass { };
+  gopass = callPackage ../tools/security/gopass {
+    buildGoModule = buildGo117Module;
+  };
 
   gopass-jsonapi = callPackage ../tools/security/gopass/jsonapi.nix { };
 
@@ -20251,9 +20253,9 @@ with pkgs;
   # is not currently available for x86_64-darwin
   #
   # do not uncomment this without approval from the go CODEOWNERS
-  #buildGo117Module = callPackage ../development/go-modules/generic {
-  #  go = buildPackages.go_1_17;
-  #};
+  buildGo117Module = callPackage ../development/go-modules/generic {
+    go = buildPackages.go_1_17;
+  };
 
   buildGoModule = buildGo116Module;
 

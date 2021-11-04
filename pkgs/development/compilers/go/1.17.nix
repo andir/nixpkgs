@@ -274,6 +274,6 @@ stdenv.mkDerivation rec {
     maintainers = teams.golang.members;
     platforms = platforms.linux ++ platforms.darwin;
     # requires >=10.13 stdenv on x86_64-darwin
-    badPlatforms = [ "x86_64-darwin" ];
+    # badPlatforms = [ "x86_64-darwin" ];
   };
 }
