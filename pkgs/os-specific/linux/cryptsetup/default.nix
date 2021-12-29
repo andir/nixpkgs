@@ -1,5 +1,5 @@
 { lib, stdenv, fetchurl, lvm2, json_c
-, openssl, libuuid, pkg-config, popt }:
+, openssl, libuuid, pkg-config, popt, systemd, autoreconfHook }:
 
 stdenv.mkDerivation rec {
   pname = "cryptsetup";
@@ -13,7 +13,11 @@ stdenv.mkDerivation rec {
   };
 
   # Disable 4 test cases that fail in a sandbox
-  patches = [ ./disable-failing-tests.patch ];
+  patches = [
+    ./disable-failing-tests.patch
+    ./0001-NixOS-remove-the-plugin-path-installation.patch
+    ./0002-NIXOS-Support-defining-external-token-library-locati.patch
+  ];
 
   postPatch = ''
     patchShebangs tests
@@ -30,9 +34,11 @@ stdenv.mkDerivation rec {
     "--enable-cryptsetup-reencrypt"
     "--with-crypto_backend=openssl"
     "--disable-ssh-token"
+    # enable cryptsetup to unlock via the systemd FIDO & TPM plugins
+    "--with-luks2-external-tokens-path=/run/current-system/systemd/lib/cryptsetup"
   ];
 
-  nativeBuildInputs = [ pkg-config ];
+  nativeBuildInputs = [ pkg-config autoreconfHook ];
   buildInputs = [ lvm2 json_c openssl libuuid popt ];
 
   doCheck = true;

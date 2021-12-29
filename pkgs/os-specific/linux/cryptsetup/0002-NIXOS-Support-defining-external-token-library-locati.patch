@@ -1,0 +1,43 @@
+From e099bc910e37cd94ec93c01d450700ecdc8a0adf Mon Sep 17 00:00:00 2001
+From: Andreas Rammhold <andreas@rammhold.de>
+Date: Wed, 29 Dec 2021 19:24:55 +0100
+Subject: [PATCH 2/2] NIXOS: Support defining external token library location
+ during runtime
+
+This allows users to select a directory where the external token
+libraries exist during runtime rather than just during compile-time.
+
+On NixOS we don't have a static place within the initrd to load the
+external token providers (without jumping through a couple of hoops). It
+is much easier to define the path within the initial init script.
+---
+ lib/luks2/luks2_token.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/lib/luks2/luks2_token.c b/lib/luks2/luks2_token.c
+index 88d84418..de4771e0 100644
+--- a/lib/luks2/luks2_token.c
++++ b/lib/luks2/luks2_token.c
+@@ -19,6 +19,7 @@
+  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+  */
+ 
++#include <stdlib.h>
+ #include <ctype.h>
+ #include <dlfcn.h>
+ #include <assert.h>
+@@ -51,7 +52,10 @@ void crypt_token_external_disable(void)
+ 
+ const char *crypt_token_external_path(void)
+ {
+-	return external_tokens_enabled ? EXTERNAL_LUKS2_TOKENS_PATH : NULL;
++	if (!external_tokens_enabled)
++		return NULL;
++
++	return secure_getenv("NIXOS_CRYPTSETUP_EXTERNAL_TOKENS_PATH") ?: EXTERNAL_LUKS2_TOKENS_PATH;
+ }
+ 
+ #if USE_EXTERNAL_TOKENS
+-- 
+2.34.0
+

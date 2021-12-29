@@ -1,0 +1,29 @@
+From a8814cfcdefb2658618f88777507781b7d038b62 Mon Sep 17 00:00:00 2001
+From: Andreas Rammhold <andreas@rammhold.de>
+Date: Wed, 29 Dec 2021 13:21:00 +0100
+Subject: [PATCH 1/2] NixOS: remove the plugin path installation
+
+We are pointing the cryptsetup plugin path to some directory that is
+only available during runtime and outside the sandbox. There is no point
+in try to create it as part of the build.
+---
+ Makefile.am | 6 ------
+ 1 file changed, 6 deletions(-)
+
+diff --git a/Makefile.am b/Makefile.am
+index bba38aed..37e2b516 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -54,9 +54,3 @@ distclean-local:
+ 
+ clean-local:
+ 	-rm -rf docs/doxygen_api_docs libargon2.la
+-
+-install-data-local:
+-	$(MKDIR_P) -m 0755 $(DESTDIR)/${EXTERNAL_LUKS2_TOKENS_PATH}
+-
+-uninstall-local:
+-	rmdir $(DESTDIR)/${EXTERNAL_LUKS2_TOKENS_PATH} 2>/dev/null || :
+-- 
+2.34.0
+
