@@ -205,6 +205,28 @@ let
 
     # LUKS
     open_normally() {
+        ${optionalString dev.useExternalTokens ''
+        ${/*
+          HACK: We just prepend the "normal" case with the tokens.
+          This entire script must be refactored (once this works)
+          to allow multiple unlock methods to cooperate better.
+
+          There is no reason why we couldn't use GPG, FIDO2, keyfiles and tokens (in a specified order) to unlock the same volume.
+
+          At least with the LUKS format2 we have enough metadata to decide during runtime which of those slots might be available - if implemented right.
+        */""}
+        modprobe tpm
+        ls -la /dev/ # see if /dev/tpm* exist
+        if NIXOS_CRYPTSETUP_EXTERNAL_TOKENS_PATH=/lib/cryptsetup strace -e openat -- ${csopen} --verbose --token-only < /dev/null; then
+          return 0;
+        else
+          find /lib/cryptsetup
+          find /nix/store
+          echo "Failed to decrypt the device using the TPM."
+          exit 231
+        fi
+        ''}
+
         ${if (dev.keyFile != null) then ''
         if wait_target "key file" ${dev.keyFile}; then
             ${csopen} --key-file=${dev.keyFile} \
@@ -219,6 +241,11 @@ let
         do_open_passphrase
         ''}
     }
+    ${optionalString dev.useExternalTokens ''
+    function use_external_token() {
+      ${csopen} --token-only
+    }
+    ''}
 
     ${optionalString (luks.yubikeySupport && (dev.yubikey != null)) ''
     # YubiKey
@@ -779,6 +806,25 @@ in
             });
           };
 
+          # FIXME: the current situation around unlocking support is terrible. We only ever support one kind of hardware token while we could allow any (in a specified order / as they are provided). This means that I also can't use a TPM for regular unlock and a GPG key as fallback (when my TPM PCRs have changed).
+          useExternalTokens = mkOption {
+            default = false;
+            description = ''
+              Use external cryptsetup token libraries to unlock the volume.
+
+              External token libraries are implemented by e.g. systemd.
+
+              When mounting using this option fails "normal" bootup will continue with any of the other configured methods.
+            '';
+          };
+
+          externalTokenPackages = mkOption {
+            default = [ pkgs.systemd ];
+            description = ''
+              A list of packages that implement external cryptsetup token libraries. The library must provide files in the "lib/cryptsetup" subdirectory.
+            '';
+          };
+
           preOpenCommands = mkOption {
             type = types.lines;
             default = "";
@@ -865,9 +911,20 @@ in
       # workaround until https://marc.info/?l=linux-crypto-vger&m=148783562211457&w=4 is merged
       # remove once 'modprobe --show-depends xts' shows ecb as a dependency
       ++ (if builtins.elem "xts" luks.cryptoModules then ["ecb"] else []);
+    boot.initrd.extraFiles."lib/cryptsetup".source = let
+      /* For all the external tokens providers copy their libraries into the initrd */
+        # a set of all the required external token packages
+        externalTokenPackages = lib.flatten (map (dev: if dev.useExternalTokens then dev.externalTokenPackages else []) (attrValues luks.devices));
+        externalTokenPaths = lib.unique (lib.flatten (map (pkg: [ (lib.getLib pkg) (lib.getBin pkg) ]) externalTokenPackages));
+    in pkgs.runCommand "cryptsetup-token-providers" {} (''
+          mkdir $out
+
+        '' + (lib.concatMapStringsSep "\n" (path: "cp -pdv ${path}/lib/cryptsetup/* $out") externalTokenPaths));
 
     # copy the cryptsetup binary and it's dependencies
-    boot.initrd.extraUtilsCommands = ''
+    boot.initrd.extraUtilsCommands = let
+    in ''
+      copy_bin_and_libs ${pkgs.strace}/bin/strace
       copy_bin_and_libs ${pkgs.cryptsetup}/bin/cryptsetup
       copy_bin_and_libs ${askPass}/bin/cryptsetup-askpass
       sed -i s,/bin/sh,$out/bin/sh, $out/bin/cryptsetup-askpass

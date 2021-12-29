@@ -66,6 +66,7 @@ let
   testScriptFun = { bootLoader, createPartitions, grubVersion, grubDevice, grubUseEfi
                   , grubIdentifier, preBootCommands, postBootCommands, extraConfig
                   , testSpecialisationConfig
+                  , enableTPM ? false
                   }:
     let iface = if grubVersion == 1 then "ide" else "virtio";
         isEfi = bootLoader == "systemd-boot" || (bootLoader == "grub" && grubUseEfi);
@@ -79,6 +80,9 @@ let
             then ''flags += " -m 1024"''
             else ''flags += " -m 768 -enable-kvm -machine virt,gic-version=host"''
           }
+          ${optionalString enableTPM ''
+            flags += " -chardev socket,id=chrtpm,path=/tmp/swtpm-sock -tpmdev emulator,id=tpm0,chardev=chrtpm -device tpm-tis,tpmdev=tpm0"
+          ''}
           return flags
 
 
@@ -99,7 +103,19 @@ let
       def create_machine_named(name):
           return create_machine({**default_flags, "name": name})
 
+      ${optionalString enableTPM ''
+        import tempfile
+        tpmstate = tempfile.TemporaryDirectory()
+        def start_swtpm():
+          import subprocess
+          subprocess.Popen(["${pkgs.swtpm}/bin/swtpm", "socket", "--tpmstate", "dir="+tpmstate.name, "--ctrl", "type=unixio,path=/tmp/swtpm-sock", "--log", "level=9", "--tpm2"])
+          print("Started software TPM")
+      ''}
 
+
+      ${optionalString enableTPM ''
+        start_swtpm()
+      ''}
       machine.start()
 
       with subtest("Assert readiness of login prompt"):
@@ -136,6 +152,9 @@ let
 
       # Now see if we can boot the installation.
       machine = create_machine_named("boot-after-install")
+      ${optionalString enableTPM ''
+        start_swtpm()
+      ''}
 
       # For example to enter LUKS passphrase.
       ${preBootCommands}
@@ -267,6 +286,7 @@ let
     , grubVersion ? 2, grubDevice ? "/dev/vda", grubIdentifier ? "uuid", grubUseEfi ? false
     , enableOCR ? false, meta ? {}
     , testSpecialisationConfig ? false
+    , enableTPM ? false
     }:
     makeTest {
       inherit enableOCR;
@@ -298,6 +318,12 @@ let
             if grubVersion == 1 then "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive2" else "/dev/vdb";
           virtualisation.qemu.diskInterface =
             if grubVersion == 1 then "scsi" else "virtio";
+
+          virtualisation.qemu.options = mkIf enableTPM [
+            "-chardev socket,id=chrtpm,path=/tmp/swtpm-sock"
+            "-tpmdev emulator,id=tpm0,chardev=chrtpm"
+            "-device tpm-tis,tpmdev=tpm0"
+          ];
 
           boot.loader.systemd-boot.enable = mkIf (bootLoader == "systemd-boot") true;
 
@@ -346,7 +372,7 @@ let
       testScript = testScriptFun {
         inherit bootLoader createPartitions preBootCommands postBootCommands
                 grubVersion grubDevice grubIdentifier grubUseEfi extraConfig
-                testSpecialisationConfig;
+                testSpecialisationConfig enableTPM;
       };
     };
 
@@ -629,6 +655,37 @@ in {
         encrypted.label = "crypt";
         encrypted.keyFile = "/mnt-root/keyfile";
       };
+    '';
+  };
+
+  encrypteRootWithTPM = makeInstallerTest "encryptedWithTPM" {
+    enableTPM = true;
+    extraConfig = ''
+      boot.initrd.luks.devices."cryptroot".useExternalTokens = true;
+    '';
+    createPartitions = ''
+      machine.succeed("test -e /dev/tpm0")
+      machine.succeed("test -e /dev/tpmrm0")
+      machine.succeed("systemd-cryptenroll --tpm2-device=list")
+
+      machine.succeed(
+        "flock /dev/vda parted --script /dev/vda -- mklabel msdos"
+        + " mkpart primary ext2 1M 100MB"  # /boot
+        + " mkpart primary linux-swap 100M 1024M"
+        + " mkpart primary 1024M -1s",  # LUKS
+        "udevadm settle",
+        "mkswap /dev/vda2 -L swap",
+        "swapon -L swap",
+        "modprobe dm_mod dm_crypt",
+        "echo -n supersecret | cryptsetup luksFormat --type=LUKS2 -q /dev/vda3 -",
+        "echo -n supersecret | cryptsetup luksOpen --key-file - /dev/vda3 cryptroot",
+        "PASSWORD=supersecret systemd-cryptenroll --tpm2-device=auto --tpm2-pcrs=7 /dev/vda3",
+        "mkfs.ext3 -L nixos /dev/mapper/cryptroot",
+        "mount LABEL=nixos /mnt",
+        "mkfs.ext3 -L boot /dev/vda1",
+        "mkdir -p /mnt/boot",
+        "mount LABEL=boot /mnt/boot",
+      )
     '';
   };
 
